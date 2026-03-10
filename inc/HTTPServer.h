@@ -38,7 +38,7 @@ protected:
 
 protected:
 	virtual Boolean continuePlaying() {
-		fInputSourceIsOpen = fSource != NULL;
+		fInputSourceIsOpen = fSource != nullptr;
 		processBuffer();
 		return True;
 	}
@@ -142,11 +142,11 @@ class HTTPServer : public RTSPServer {
 	public:
 		HTTPClientConnection(RTSPServer &ourServer, int clientSocket, struct SOCKETCLIENT clientAddr, Boolean useTLS)
 #if LIVEMEDIA_LIBRARY_VERSION_INT >= 1642723200
-			: RTSPServer::RTSPClientConnection(ourServer, clientSocket, clientAddr, useTLS), m_TCPSink(NULL),
-			  m_StreamToken(NULL), m_Subsession(NULL), m_Source(NULL) {
+			: RTSPServer::RTSPClientConnection(ourServer, clientSocket, clientAddr, useTLS), m_TCPSink(nullptr),
+			  m_StreamToken(nullptr), m_Subsession(nullptr), m_Source(nullptr) {
 #else
-			: RTSPServer::RTSPClientConnection(ourServer, clientSocket, clientAddr), m_TCPSink(NULL),
-			  m_StreamToken(NULL), m_Subsession(NULL), m_Source(NULL) {
+			: RTSPServer::RTSPClientConnection(ourServer, clientSocket, clientAddr), m_TCPSink(nullptr),
+			  m_StreamToken(nullptr), m_Subsession(nullptr), m_Source(nullptr) {
 #endif
 		}
 		virtual ~HTTPClientConnection();
@@ -183,7 +183,7 @@ class HTTPServer : public RTSPServer {
 
 	class MyUserAuthenticationDatabase : public UserAuthenticationDatabase {
 	public:
-		MyUserAuthenticationDatabase(char const *realm = NULL, Boolean passwordsAreMD5 = False)
+		MyUserAuthenticationDatabase(char const *realm = nullptr, Boolean passwordsAreMD5 = False)
 			: UserAuthenticationDatabase(realm, passwordsAreMD5) {}
 		virtual ~MyUserAuthenticationDatabase() {}
 
@@ -192,7 +192,7 @@ class HTTPServer : public RTSPServer {
 			HashTable::Iterator *iter(HashTable::Iterator::create(*fTable));
 			char const *key;
 			char *user;
-			while ((user = (char *)iter->next(key)) != NULL) {
+			while ((user = (char *)iter->next(key)) != nullptr) {
 				users.push_back(user);
 			}
 			return users;
@@ -200,9 +200,9 @@ class HTTPServer : public RTSPServer {
 
 		static MyUserAuthenticationDatabase *
 		createNew(const std::list<std::string> &userPasswordList, const char *realm) {
-			MyUserAuthenticationDatabase *auth = NULL;
+			MyUserAuthenticationDatabase *auth = nullptr;
 			if (userPasswordList.size() > 0) {
-				auth = new MyUserAuthenticationDatabase(realm, (realm != NULL));
+				auth = new MyUserAuthenticationDatabase(realm, (realm != nullptr));
 
 				std::list<std::string>::const_iterator it;
 				for (it = userPasswordList.begin(); it != userPasswordList.end(); ++it) {
@@ -225,7 +225,7 @@ public:
 			unsigned reclamationTestSeconds, unsigned int hlsSegment, const std::string &webroot,
 			const std::string &sslCert, bool enableRTSPS
 	) {
-		HTTPServer *httpServer = NULL;
+		HTTPServer *httpServer = nullptr;
 #if LIVEMEDIA_LIBRARY_VERSION_INT < 1610928000
 		int ourSocketIPv4 = setUpOurSocket(env, rtspPort);
 #else
@@ -324,15 +324,15 @@ public:
 	}
 
 	void addUserRecord(const char *username, const char *password) {
-		UserAuthenticationDatabase *auth = this->getAuthenticationDatabaseForCommand(NULL);
-		if (auth != NULL) {
+		UserAuthenticationDatabase *auth = this->getAuthenticationDatabaseForCommand(nullptr);
+		if (auth != nullptr) {
 			auth->addUserRecord(username, password);
 		}
 	}
 
 	void removeUserRecord(const char *username) {
-		UserAuthenticationDatabase *auth = this->getAuthenticationDatabaseForCommand(NULL);
-		if (auth != NULL) {
+		UserAuthenticationDatabase *auth = this->getAuthenticationDatabaseForCommand(nullptr);
+		if (auth != nullptr) {
 			auth->removeUserRecord(username);
 		}
 	}
@@ -340,8 +340,8 @@ public:
 	std::list<std::string> getUsers() {
 		std::list<std::string> users;
 		MyUserAuthenticationDatabase *auth =
-				(MyUserAuthenticationDatabase *)this->getAuthenticationDatabaseForCommand(NULL);
-		if (auth != NULL) {
+				(MyUserAuthenticationDatabase *)this->getAuthenticationDatabaseForCommand(nullptr);
+		if (auth != nullptr) {
 			users = auth->getUsers();
 		}
 		return users;

@@ -32,7 +32,7 @@ public:
 	// Captured frame
 	// ---------------------------------
 	struct Frame {
-		Frame(char *buffer, int size, timeval timestamp, char *allocatedBuffer = NULL)
+		Frame(char *buffer, int size, timeval timestamp, char *allocatedBuffer = nullptr)
 			: m_buffer(buffer), m_size(size), m_timestamp(timestamp), m_allocatedBuffer(allocatedBuffer) {};
 		Frame(const Frame &);
 		Frame &operator=(const Frame &);
@@ -99,7 +99,7 @@ protected:
 	void incomingPacketHandler();
 	int getNextFrame();
 	void processFrame(char *frame, int frameSize, const timeval &ref);
-	void queueFrame(char *frame, int frameSize, const timeval &tv, char *allocatedBuffer = NULL);
+	void queueFrame(char *frame, int frameSize, const timeval &tv, char *allocatedBuffer = nullptr);
 
 	// split packet in frames
 	virtual std::list<std::pair<unsigned char *, size_t>> splitFrames(unsigned char *frame, unsigned frameSize);

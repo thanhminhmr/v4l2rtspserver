@@ -19,7 +19,7 @@
 // ---------------------------------
 FramedSource *
 BaseServerMediaSubsession::createSource(UsageEnvironment &env, FramedSource *videoES, const std::string &format) {
-	FramedSource *source = NULL;
+	FramedSource *source = nullptr;
 	if (format == "video/MP2T") {
 		source = MPEG2TransportStreamFramer::createNew(env, videoES);
 	} else if (format == "video/H264") {
@@ -42,7 +42,7 @@ RTPSink *BaseServerMediaSubsession::createSink(
 		UsageEnvironment &env, Groupsock *rtpGroupsock, unsigned char rtpPayloadTypeIfDynamic,
 		const std::string &format, V4L2DeviceSource *source
 ) {
-	RTPSink *videoSink = NULL;
+	RTPSink *videoSink = nullptr;
 	if (format == "video/MP2T") {
 		videoSink = SimpleRTPSink::createNew(
 				env, rtpGroupsock, rtpPayloadTypeIfDynamic, 90000, "video", "MP2T", 1, True, False
@@ -118,7 +118,7 @@ RTPSink *BaseServerMediaSubsession::createSink(
 }
 
 char const *BaseServerMediaSubsession::getAuxLine(V4L2DeviceSource *source, RTPSink *rtpSink) {
-	const char *auxLine = NULL;
+	const char *auxLine = nullptr;
 	if (rtpSink) {
 		std::ostringstream os;
 		if (rtpSink->auxSDPLine()) {

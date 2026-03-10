@@ -92,7 +92,7 @@ int main(int argc, char **argv) {
 	unsigned int hlsSegment = 0;
 	std::string sslKeyCert;
 	bool enableRTSPS = false;
-	const char *realm = NULL;
+	const char *realm = nullptr;
 	std::list<std::string> userPasswordList;
 	std::string webroot;
 #ifdef HAVE_ALSA
@@ -102,7 +102,7 @@ int main(int argc, char **argv) {
 	snd_pcm_format_t audioFmt = SND_PCM_FORMAT_UNKNOWN;
 #endif
 	const char *defaultPort = getenv("PORT");
-	if (defaultPort != NULL) {
+	if (defaultPort != nullptr) {
 		rtspPort = atoi(defaultPort);
 	}
 
@@ -363,17 +363,17 @@ int main(int argc, char **argv) {
 				output.assign("");
 			}
 
-			V4l2Output *out = NULL;
+			V4l2Output *out = nullptr;
 			V4L2DeviceParameters inParam(videoDev.c_str(), videoformatList, width, height, fps, ioTypeIn, openflags);
 			StreamReplicator *videoReplicator = rtspServer.CreateVideoReplicator(
 					inParam, queueSize, captureMode, repeatConfig, output, ioTypeOut, out
 			);
-			if (out != NULL) {
+			if (out != nullptr) {
 				outList.push_back(out);
 			}
 
 			// Init Audio Capture
-			StreamReplicator *audioReplicator = NULL;
+			StreamReplicator *audioReplicator = nullptr;
 #ifdef HAVE_ALSA
 			audioReplicator = rtspServer.CreateAudioReplicator(
 					audioDev, audioFmtList, audioFreq, audioNbChannels, verbose, queueSize, captureMode

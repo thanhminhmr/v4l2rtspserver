@@ -21,27 +21,27 @@
 // extract a frame
 unsigned char *
 H26X_V4L2DeviceSource::extractFrame(unsigned char *frame, size_t &size, size_t &outsize, int &frameType) {
-	unsigned char *outFrame = NULL;
+	unsigned char *outFrame = nullptr;
 	outsize = 0;
 	unsigned int markerlength = 0;
 	frameType = 0;
 
 	unsigned char *startFrame = (unsigned char *)memmem(frame, size, H264marker, sizeof(H264marker));
-	if (startFrame != NULL) {
+	if (startFrame != nullptr) {
 		markerlength = sizeof(H264marker);
 	} else {
 		startFrame = (unsigned char *)memmem(frame, size, H264shortmarker, sizeof(H264shortmarker));
-		if (startFrame != NULL) {
+		if (startFrame != nullptr) {
 			markerlength = sizeof(H264shortmarker);
 		}
 	}
-	if (startFrame != NULL) {
+	if (startFrame != nullptr) {
 		frameType = startFrame[markerlength];
 
 		int remainingSize = size - (startFrame - frame + markerlength);
 		unsigned char *endFrame =
 				(unsigned char *)memmem(&startFrame[markerlength], remainingSize, H264marker, sizeof(H264marker));
-		if (endFrame == NULL) {
+		if (endFrame == nullptr) {
 			endFrame = (unsigned char *)memmem(
 					&startFrame[markerlength], remainingSize, H264shortmarker, sizeof(H264shortmarker)
 			);
@@ -55,7 +55,7 @@ H26X_V4L2DeviceSource::extractFrame(unsigned char *frame, size_t &size, size_t &
 			outFrame = &startFrame[markerlength];
 		}
 
-		if (endFrame != NULL) {
+		if (endFrame != nullptr) {
 			outsize = endFrame - outFrame;
 		} else {
 			outsize = size;

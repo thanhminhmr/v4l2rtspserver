@@ -40,7 +40,7 @@ TSServerMediaSubsession::TSServerMediaSubsession(
 
 	// Start Playing the HLS Sink
 	m_hlsSink = MemoryBufferSink::createNew(env, OutPacketBuffer::maxSize, sliceDuration);
-	m_hlsSink->startPlaying(*tsSource, NULL, NULL);
+	m_hlsSink->startPlaying(*tsSource, nullptr, nullptr);
 }
 
 TSServerMediaSubsession::~TSServerMediaSubsession() { Medium::close(m_hlsSink); }
@@ -59,7 +59,7 @@ void TSServerMediaSubsession::seekStream(
 }
 
 FramedSource *TSServerMediaSubsession::getStreamSource(void *streamToken) {
-	FramedSource *source = NULL;
+	FramedSource *source = nullptr;
 
 	std::string buffer = m_hlsSink->getBuffer(m_slice);
 	unsigned int size = buffer.size();

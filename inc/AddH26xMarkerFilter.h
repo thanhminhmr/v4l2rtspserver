@@ -55,7 +55,7 @@ private:
 	}
 
 	virtual void doGetNextFrame() {
-		if (fInputSource != NULL) {
+		if (fInputSource != nullptr) {
 			fInputSource->getNextFrame(m_buffer, m_bufferSize, afterGettingFrame, this, handleClosure, this);
 		}
 	}

@@ -26,14 +26,14 @@ class V4l2RTSPServer {
 public:
 	V4l2RTSPServer(
 			unsigned short rtspPort, unsigned short rtspOverHTTPPort = 0, int timeout = 10, unsigned int hlsSegment = 0,
-			const std::list<std::string> &userPasswordList = std::list<std::string>(), const char *realm = NULL,
+			const std::list<std::string> &userPasswordList = std::list<std::string>(), const char *realm = nullptr,
 			const std::string &webroot = "", const std::string &sslkeycert = "", bool enableRTSPS = false
 	)
 		: m_stop(0), m_env(BasicUsageEnvironment::createNew(*BasicTaskScheduler::createNew())), m_rtspPort(rtspPort) {
 		m_rtspServer = HTTPServer::createNew(
 				*m_env, rtspPort, userPasswordList, realm, timeout, hlsSegment, webroot, sslkeycert, enableRTSPS
 		);
-		if (m_rtspServer != NULL) {
+		if (m_rtspServer != nullptr) {
 			if (rtspOverHTTPPort) {
 				m_rtspServer->setUpTunnelingOverHTTP(rtspOverHTTPPort);
 			}
@@ -47,7 +47,7 @@ public:
 		delete scheduler;
 	}
 
-	bool available() { return ((m_env != NULL) && (m_rtspServer != NULL)); }
+	bool available() { return ((m_env != nullptr) && (m_rtspServer != nullptr)); }
 	std::string getResultMsg() {
 		std::string result("UsageEnvironment not exists");
 		if (m_env) {
@@ -209,7 +209,7 @@ public:
 	std::string getRtspUrl(ServerMediaSession *sms) {
 		std::string url;
 		char *rtspurl = m_rtspServer->rtspURL(sms);
-		if (rtspurl != NULL) {
+		if (rtspurl != nullptr) {
 			url = rtspurl;
 			delete[] rtspurl;
 		}
@@ -244,10 +244,10 @@ protected:
 
 	ServerMediaSession *
 	addSession(const std::string &sessionName, const std::list<ServerMediaSubsession *> &subSession) {
-		ServerMediaSession *sms = NULL;
+		ServerMediaSession *sms = nullptr;
 		if (subSession.empty() == false) {
 			sms = ServerMediaSession::createNew(*m_env, sessionName.c_str());
-			if (sms != NULL) {
+			if (sms != nullptr) {
 				std::list<ServerMediaSubsession *>::const_iterator subIt;
 				for (subIt = subSession.begin(); subIt != subSession.end(); ++subIt) {
 					sms->addSubsession(*subIt);
@@ -256,7 +256,7 @@ protected:
 				m_rtspServer->addServerMediaSession(sms);
 
 				char *url = m_rtspServer->rtspURL(sms);
-				if (url != NULL) {
+				if (url != nullptr) {
 					LOG(NOTICE) << "Play this stream using the URL \"" << url << "\"";
 					delete[] url;
 				}

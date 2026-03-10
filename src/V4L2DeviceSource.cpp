@@ -38,7 +38,7 @@ int V4L2DeviceSource::Stats::notify(int tv_sec, int framesize) {
 V4L2DeviceSource *V4L2DeviceSource::createNew(
 		UsageEnvironment &env, DeviceInterface *device, int outputFd, unsigned int queueSize, CaptureMode captureMode
 ) {
-	V4L2DeviceSource *source = NULL;
+	V4L2DeviceSource *source = nullptr;
 	if (device) {
 		source = new V4L2DeviceSource(env, device, outputFd, queueSize, captureMode);
 	}
@@ -90,7 +90,7 @@ void *V4L2DeviceSource::thread() {
 		FD_SET(fd, &fdset);
 		tv.tv_sec = 1;
 		tv.tv_usec = 0;
-		int ret = select(fd + 1, &fdset, NULL, NULL, &tv);
+		int ret = select(fd + 1, &fdset, nullptr, nullptr, &tv);
 		if (ret == 1) {
 			LOG(DEBUG) << "waitingFrame\tdelay:" << (1000 - (tv.tv_usec / 1000)) << "ms";
 			if (this->getNextFrame() <= 0) {
@@ -104,7 +104,7 @@ void *V4L2DeviceSource::thread() {
 		}
 	}
 	LOG(NOTICE) << "end thread";
-	return NULL;
+	return nullptr;
 }
 
 // getting FrameSource callback
@@ -121,7 +121,7 @@ void V4L2DeviceSource::deliverFrame() {
 			LOG(DEBUG) << "Queue is empty";
 		} else {
 			timeval curTime;
-			gettimeofday(&curTime, NULL);
+			gettimeofday(&curTime, nullptr);
 			Frame *frame = m_captureQueue.front();
 			m_captureQueue.pop_front();
 
@@ -166,7 +166,7 @@ void V4L2DeviceSource::incomingPacketHandler() {
 // read from device
 int V4L2DeviceSource::getNextFrame() {
 	timeval ref;
-	gettimeofday(&ref, NULL);
+	gettimeofday(&ref, nullptr);
 	char *buffer = new char[m_device->getBufferSize()];
 	int frameSize = m_device->read(buffer, m_device->getBufferSize());
 	if (frameSize < 0) {
@@ -184,7 +184,7 @@ int V4L2DeviceSource::getNextFrame() {
 // post frame to queue
 void V4L2DeviceSource::postFrame(char *frame, int frameSize, const timeval &ref) {
 	timeval tv;
-	gettimeofday(&tv, NULL);
+	gettimeofday(&tv, nullptr);
 	timeval diff;
 	timersub(&tv, &ref, &diff);
 	m_in.notify(tv.tv_sec, frameSize);
@@ -202,7 +202,7 @@ void V4L2DeviceSource::postFrame(char *frame, int frameSize, const timeval &ref)
 
 void V4L2DeviceSource::processFrame(char *frame, int frameSize, const timeval &ref) {
 	timeval tv;
-	gettimeofday(&tv, NULL);
+	gettimeofday(&tv, nullptr);
 	timeval diff;
 	timersub(&tv, &ref, &diff);
 
@@ -210,7 +210,7 @@ void V4L2DeviceSource::processFrame(char *frame, int frameSize, const timeval &r
 	while (!frameList.empty()) {
 		std::pair<unsigned char *, size_t> &item = frameList.front();
 		size_t size = item.second;
-		char *allocatedBuffer = NULL;
+		char *allocatedBuffer = nullptr;
 		if (frameList.size() == 1) {
 			// last frame will release buffer
 			allocatedBuffer = frame;
@@ -241,7 +241,7 @@ void V4L2DeviceSource::queueFrame(char *frame, int frameSize, const timeval &tv,
 // split packet in frames
 std::list<std::pair<unsigned char *, size_t>> V4L2DeviceSource::splitFrames(unsigned char *frame, unsigned frameSize) {
 	std::list<std::pair<unsigned char *, size_t>> frameList;
-	if (frame != NULL) {
+	if (frame != nullptr) {
 		frameList.push_back(std::pair<unsigned char *, size_t>(frame, frameSize));
 
 		std::lock_guard<std::mutex> lock(m_lastFrameMutex);

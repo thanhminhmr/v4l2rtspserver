@@ -49,14 +49,14 @@ void HTTPServer::HTTPClientConnection::streamSource(const std::string &content) 
 }
 
 void HTTPServer::HTTPClientConnection::streamSource(FramedSource *source) {
-	if (m_TCPSink != NULL) {
+	if (m_TCPSink != nullptr) {
 		m_TCPSink->stopPlaying();
 		Medium::close(m_TCPSink);
 	}
-	if (m_Source != NULL) {
+	if (m_Source != nullptr) {
 		Medium::close(m_Source);
 	}
-	if (source != NULL) {
+	if (source != nullptr) {
 		m_TCPSink = new TCPSink(envir(), fClientOutputSocket);
 		m_TCPSink->startPlaying(*source, afterStreaming, this);
 		m_Source = source;
@@ -69,14 +69,14 @@ void lookupServerMediaSessionCompletionFuncCallback(void *clientData, ServerMedi
 }
 
 ServerMediaSubsession *HTTPServer::HTTPClientConnection::getSubsesion(const char *urlSuffix) {
-	ServerMediaSubsession *subsession = NULL;
-	ServerMediaSession *session = NULL;
+	ServerMediaSubsession *subsession = nullptr;
+	ServerMediaSession *session = nullptr;
 #if LIVEMEDIA_LIBRARY_VERSION_INT < 1610582400
 	session = fOurServer.lookupServerMediaSession(urlSuffix);
 #else
 	fOurServer.lookupServerMediaSession(urlSuffix, lookupServerMediaSessionCompletionFuncCallback, &session);
 #endif
-	if (session != NULL) {
+	if (session != nullptr) {
 		ServerMediaSubsessionIterator iter(*session);
 		subsession = iter.next();
 	}
@@ -85,7 +85,7 @@ ServerMediaSubsession *HTTPServer::HTTPClientConnection::getSubsesion(const char
 
 bool HTTPServer::HTTPClientConnection::sendM3u8PlayList(char const *urlSuffix) {
 	ServerMediaSubsession *subsession = this->getSubsesion(urlSuffix);
-	if (subsession == NULL) {
+	if (subsession == nullptr) {
 		return false;
 	}
 
@@ -94,7 +94,7 @@ bool HTTPServer::HTTPClientConnection::sendM3u8PlayList(char const *urlSuffix) {
 		return false;
 	}
 
-	unsigned int startTime = subsession->getCurrentNPT(NULL);
+	unsigned int startTime = subsession->getCurrentNPT(nullptr);
 	HTTPServer *httpServer = (HTTPServer *)(&fOurServer);
 	unsigned sliceDuration = httpServer->m_hlsSegment;
 	std::ostringstream os;
@@ -122,7 +122,7 @@ bool HTTPServer::HTTPClientConnection::sendM3u8PlayList(char const *urlSuffix) {
 
 bool HTTPServer::HTTPClientConnection::sendMpdPlayList(char const *urlSuffix) {
 	ServerMediaSubsession *subsession = this->getSubsesion(urlSuffix);
-	if (subsession == NULL) {
+	if (subsession == nullptr) {
 		return false;
 	}
 
@@ -131,7 +131,7 @@ bool HTTPServer::HTTPClientConnection::sendMpdPlayList(char const *urlSuffix) {
 		return false;
 	}
 
-	unsigned int startTime = subsession->getCurrentNPT(NULL);
+	unsigned int startTime = subsession->getCurrentNPT(nullptr);
 	HTTPServer *httpServer = (HTTPServer *)(&fOurServer);
 	unsigned sliceDuration = httpServer->m_hlsSegment;
 	std::ostringstream os;
@@ -214,8 +214,8 @@ bool HTTPServer::HTTPClientConnection::sendFile(char const *urlSuffix) {
 std::list<std::string> getSubsessionFormats(ServerMediaSession *session) {
 	std::list<std::string> formats;
 	ServerMediaSubsessionIterator iter(*session);
-	ServerMediaSubsession *subsession = NULL;
-	while ((subsession = iter.next()) != NULL) {
+	ServerMediaSubsession *subsession = nullptr;
+	while ((subsession = iter.next()) != nullptr) {
 		BaseServerMediaSubsession *baseSubsession = dynamic_cast<BaseServerMediaSubsession *>(subsession);
 		if (baseSubsession) {
 			std::string format = baseSubsession->getFormat();
@@ -242,17 +242,17 @@ void HTTPServer::HTTPClientConnection::handleHTTPCmd_StreamingGET(char const *ur
 			streamName.clear();
 		}
 		ServerMediaSessionIterator it(fOurServer);
-		ServerMediaSession *serverSession = NULL;
-		while ((serverSession = it.next()) != NULL) {
+		ServerMediaSession *serverSession = nullptr;
+		while ((serverSession = it.next()) != nullptr) {
 			if ((streamName == serverSession->streamName()) || streamName.empty()) {
 				break;
 			}
 		}
-		BaseServerMediaSubsession *baseSubsession = NULL;
-		if (serverSession != NULL) {
+		BaseServerMediaSubsession *baseSubsession = nullptr;
+		if (serverSession != nullptr) {
 			ServerMediaSubsessionIterator subIt(*serverSession);
 			ServerMediaSubsession *subsession = subIt.next();
-			if (subsession != NULL) {
+			if (subsession != nullptr) {
 				baseSubsession = dynamic_cast<BaseServerMediaSubsession *>(subsession);
 			}
 		}
@@ -276,8 +276,8 @@ void HTTPServer::HTTPClientConnection::handleHTTPCmd_StreamingGET(char const *ur
 		os << "[\n";
 		bool first = true;
 		ServerMediaSessionIterator it(fOurServer);
-		ServerMediaSession *serverSession = NULL;
-		while ((serverSession = it.next()) != NULL) {
+		ServerMediaSession *serverSession = nullptr;
+		while ((serverSession = it.next()) != nullptr) {
 			if (first) {
 				first = false;
 				os << " ";
@@ -299,7 +299,7 @@ void HTTPServer::HTTPClientConnection::handleHTTPCmd_StreamingGET(char const *ur
 		std::string content(os.str());
 		this->sendHeader("text/plain", content.size());
 		this->streamSource(content);
-	} else if (questionMarkPos == NULL) {
+	} else if (questionMarkPos == nullptr) {
 		std::string streamName(urlSuffix);
 		std::string ext;
 
@@ -336,7 +336,7 @@ void HTTPServer::HTTPClientConnection::handleHTTPCmd_StreamingGET(char const *ur
 
 		std::string streamName(urlSuffix, questionMarkPos - urlSuffix);
 		ServerMediaSubsession *subsession = this->getSubsesion(streamName.c_str());
-		if (subsession == NULL) {
+		if (subsession == nullptr) {
 			handleHTTPCmd_notSupported();
 			fIsActive = False;
 			return;
@@ -363,7 +363,7 @@ void HTTPServer::HTTPClientConnection::handleHTTPCmd_StreamingGET(char const *ur
 #else
 
 		subsession->getStreamParameters(
-				m_ClientSessionId, clientAddress, clientRTPPort, clientRTCPPort, -1, 0, 0, NULL, destinationAddress,
+				m_ClientSessionId, clientAddress, clientRTPPort, clientRTCPPort, -1, 0, 0, nullptr, destinationAddress,
 				destinationTTL, isMulticast, serverRTPPort, serverRTCPPort, m_StreamToken
 		);
 #endif
@@ -402,8 +402,8 @@ void HTTPServer::HTTPClientSession::handleCmd_SETUP(
 void HTTPServer::HTTPClientConnection::handleCmd_notFound() {
 	std::ostringstream os;
 	ServerMediaSessionIterator it(fOurServer);
-	ServerMediaSession *serverSession = NULL;
-	while ((serverSession = it.next()) != NULL) {
+	ServerMediaSession *serverSession = nullptr;
+	while ((serverSession = it.next()) != nullptr) {
 		os << serverSession->streamName() << "\n";
 	}
 
@@ -424,7 +424,7 @@ void HTTPServer::HTTPClientConnection::afterStreaming(void *clientData) {
 }
 
 HTTPServer::HTTPClientConnection::~HTTPClientConnection() {
-	this->streamSource(NULL);
+	this->streamSource(nullptr);
 
 	if (m_Subsession) {
 		m_Subsession->deleteStream(m_ClientSessionId, m_StreamToken);

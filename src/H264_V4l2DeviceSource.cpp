@@ -31,7 +31,7 @@ H264_V4L2DeviceSource::splitFrames(unsigned char *frame, unsigned frameSize) {
 	size_t size = 0;
 	int frameType = 0;
 	unsigned char *buffer = this->extractFrame(frame, bufSize, size, frameType);
-	while (buffer != NULL) {
+	while (buffer != nullptr) {
 		switch (frameType & 0x1F) {
 		case 7:
 			LOG(INFO) << "SPS size:" << size << " bufSize:" << bufSize;

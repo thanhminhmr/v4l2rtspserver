@@ -61,7 +61,7 @@ ALSACapture *ALSACapture::createNew(const ALSACaptureParameters &params) {
 	if (capture) {
 		if (capture->getFd() == -1) {
 			delete capture;
-			capture = NULL;
+			capture = nullptr;
 		}
 	}
 	return capture;
@@ -70,17 +70,17 @@ ALSACapture *ALSACapture::createNew(const ALSACaptureParameters &params) {
 ALSACapture::~ALSACapture() { this->close(); }
 
 void ALSACapture::close() {
-	if (m_pcm != NULL) {
+	if (m_pcm != nullptr) {
 		snd_pcm_close(m_pcm);
-		m_pcm = NULL;
+		m_pcm = nullptr;
 	}
 }
 
 ALSACapture::ALSACapture(const ALSACaptureParameters &params)
-	: m_pcm(NULL), m_bufferSize(0), m_periodSize(0), m_params(params) {
+	: m_pcm(nullptr), m_bufferSize(0), m_periodSize(0), m_params(params) {
 	LOG(NOTICE) << "Open ALSA device: \"" << params.m_devName << "\"";
 
-	snd_pcm_hw_params_t *hw_params = NULL;
+	snd_pcm_hw_params_t *hw_params = nullptr;
 	int err = 0;
 
 	// open PCM device

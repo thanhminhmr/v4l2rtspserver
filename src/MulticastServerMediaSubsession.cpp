@@ -47,10 +47,10 @@ RTPSink *MulticastServerMediaSubsession::createRtpSink(
 	gethostname((char *)CNAME, maxCNAMElen);
 	CNAME[maxCNAMElen] = '\0';
 	Groupsock *rtcpGroupsock = new Groupsock(env, groupAddress, rtcpPortNum, ttl);
-	m_rtcpInstance = RTCPInstance::createNew(env, rtcpGroupsock, 500, CNAME, m_rtpSink, NULL);
+	m_rtcpInstance = RTCPInstance::createNew(env, rtcpGroupsock, 500, CNAME, m_rtpSink, nullptr);
 
 	// Start Playing the Sink
-	m_rtpSink->startPlaying(*videoSource, NULL, NULL);
+	m_rtpSink->startPlaying(*videoSource, nullptr, nullptr);
 
 	return m_rtpSink;
 }
@@ -68,7 +68,7 @@ char const *MulticastServerMediaSubsession::sdpLines(int addressFamily) {
 #else
 		m_SDPLines[addressFamily].assign(PassiveServerMediaSubsession::sdpLines(addressFamily));
 #endif
-		m_SDPLines[addressFamily].append(getAuxSDPLine(m_rtpSink, NULL));
+		m_SDPLines[addressFamily].append(getAuxSDPLine(m_rtpSink, nullptr));
 	}
 	return m_SDPLines[addressFamily].c_str();
 }

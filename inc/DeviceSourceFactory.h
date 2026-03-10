@@ -24,7 +24,7 @@ public:
 			V4L2DeviceSource::CaptureMode captureMode = V4L2DeviceSource::CAPTURE_INTERNAL_THREAD, int outfd = -1,
 			bool repeatConfig = true
 	) {
-		FramedSource *source = NULL;
+		FramedSource *source = nullptr;
 		if (format == V4L2_PIX_FMT_H264) {
 			source = H264_V4L2DeviceSource::createNew(
 					*env, devCapture, outfd, queueSize, captureMode, repeatConfig, false
@@ -44,11 +44,11 @@ public:
 			V4L2DeviceSource::CaptureMode captureMode = V4L2DeviceSource::CAPTURE_INTERNAL_THREAD, int outfd = -1,
 			bool repeatConfig = true
 	) {
-		StreamReplicator *replicator = NULL;
+		StreamReplicator *replicator = nullptr;
 		FramedSource *framedSource = DeviceSourceFactory::createFramedSource(
 				env, format, devCapture, queueSize, captureMode, outfd, repeatConfig
 		);
-		if (framedSource != NULL) {
+		if (framedSource != nullptr) {
 			// extend buffer size if needed
 			if (devCapture->getBufferSize() > OutPacketBuffer::maxSize) {
 				OutPacketBuffer::maxSize = devCapture->getBufferSize();

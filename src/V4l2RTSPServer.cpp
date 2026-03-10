@@ -29,7 +29,7 @@ StreamReplicator *V4l2RTSPServer::CreateVideoReplicator(
 		const std::string &outputFile, V4l2IoType ioTypeOut, V4l2Output *&out
 ) {
 
-	StreamReplicator *videoReplicator = NULL;
+	StreamReplicator *videoReplicator = nullptr;
 	std::string videoDev(inParam.m_devName);
 	if (!videoDev.empty()) {
 		// Init video capture
@@ -45,7 +45,7 @@ StreamReplicator *V4l2RTSPServer::CreateVideoReplicator(
 						videoCapture->getHeight(), 0, ioTypeOut
 				);
 				out = V4l2Output::create(outparam);
-				if (out != NULL) {
+				if (out != nullptr) {
 					outfd = out->getFd();
 					LOG(INFO) << "Output fd:" << outfd << " " << outputFile;
 				} else {
@@ -62,7 +62,7 @@ StreamReplicator *V4l2RTSPServer::CreateVideoReplicator(
 						this->env(), videoCapture->getFormat(), new VideoCaptureAccess(videoCapture), queueSize,
 						captureMode, outfd, repeatConfig
 				);
-				if (videoReplicator == NULL) {
+				if (videoReplicator == nullptr) {
 					LOG(FATAL) << "Unable to create source for device " << videoDev;
 					delete videoCapture;
 				}
@@ -107,8 +107,8 @@ std::string V4l2RTSPServer::getV4l2Alsa(const std::string &v4l2device) {
 	std::map<std::string, std::string> videodevices;
 	std::string video4linuxPath("/sys/class/video4linux");
 	DIR *dp = opendir(video4linuxPath.c_str());
-	if (dp != NULL) {
-		struct dirent *entry = NULL;
+	if (dp != nullptr) {
+		struct dirent *entry = nullptr;
 		while ((entry = readdir(dp))) {
 			std::string devicename;
 			std::string deviceid;
@@ -130,7 +130,7 @@ std::string V4l2RTSPServer::getV4l2Alsa(const std::string &v4l2device) {
 	std::map<std::string, std::string> audiodevices;
 	int rcard = -1;
 	while ((snd_card_next(&rcard) == 0) && (rcard >= 0)) {
-		void **hints = NULL;
+		void **hints = nullptr;
 		if (snd_device_name_hint(rcard, "pcm", &hints) >= 0) {
 			void **str = hints;
 			while (*str) {
@@ -199,7 +199,7 @@ StreamReplicator *V4l2RTSPServer::CreateAudioReplicator(
 		const std::string &audioDev, const std::list<snd_pcm_format_t> &audioFmtList, int audioFreq,
 		int audioNbChannels, int verbose, int queueSize, V4L2DeviceSource::CaptureMode captureMode
 ) {
-	StreamReplicator *audioReplicator = NULL;
+	StreamReplicator *audioReplicator = nullptr;
 	if (!audioDev.empty()) {
 		// find the ALSA device associated with the V4L2 device
 		std::string audioDevice = getV4l2Alsa(audioDev);
@@ -212,7 +212,7 @@ StreamReplicator *V4l2RTSPServer::CreateAudioReplicator(
 		if (audioCapture) {
 			audioReplicator =
 					DeviceSourceFactory::createStreamReplicator(this->env(), 0, audioCapture, queueSize, captureMode);
-			if (audioReplicator == NULL) {
+			if (audioReplicator == nullptr) {
 				LOG(FATAL) << "Unable to create source for device " << audioDevice;
 				delete audioCapture;
 			}

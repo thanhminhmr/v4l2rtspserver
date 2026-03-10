@@ -23,7 +23,7 @@ MemoryBufferSink::~MemoryBufferSink() { delete[] m_buffer; }
 
 Boolean MemoryBufferSink::continuePlaying() {
 	Boolean ret = False;
-	if (fSource != NULL) {
+	if (fSource != nullptr) {
 		fSource->getNextFrame(m_buffer, m_bufferSize, afterGettingFrame, this, onSourceClosure, this);
 		ret = True;
 	}

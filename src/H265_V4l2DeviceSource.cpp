@@ -27,7 +27,7 @@ H265_V4L2DeviceSource::splitFrames(unsigned char *frame, unsigned frameSize) {
 	size_t size = 0;
 	int frameType = 0;
 	unsigned char *buffer = this->extractFrame(frame, bufSize, size, frameType);
-	while (buffer != NULL) {
+	while (buffer != nullptr) {
 		switch ((frameType & 0x7E) >> 1) {
 		case 32:
 			LOG(INFO) << "VPS size:" << size << " bufSize:" << bufSize;
