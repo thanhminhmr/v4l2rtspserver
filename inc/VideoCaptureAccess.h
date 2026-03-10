@@ -17,8 +17,7 @@
 // -----------------------------------------
 //    Video Device Capture Interface
 // -----------------------------------------
-class VideoCaptureAccess : public DeviceInterface
-{
+class VideoCaptureAccess : public DeviceInterface {
 public:
 	VideoCaptureAccess(V4l2Capture *device) : m_device(device) {}
 	virtual ~VideoCaptureAccess() { delete m_device; }

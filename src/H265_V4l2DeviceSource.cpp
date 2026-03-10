@@ -15,22 +15,20 @@
 #include <Base64.hh>
 
 // project
-#include "logger.h"
 #include "H265_V4l2DeviceSource.h"
+#include "logger.h"
 
 // split packet in frames
-std::list<std::pair<unsigned char *, size_t>> H265_V4L2DeviceSource::splitFrames(unsigned char *frame, unsigned frameSize)
-{
+std::list<std::pair<unsigned char *, size_t>>
+H265_V4L2DeviceSource::splitFrames(unsigned char *frame, unsigned frameSize) {
 	std::list<std::pair<unsigned char *, size_t>> frameList;
 
 	size_t bufSize = frameSize;
 	size_t size = 0;
 	int frameType = 0;
 	unsigned char *buffer = this->extractFrame(frame, bufSize, size, frameType);
-	while (buffer != NULL)
-	{
-		switch ((frameType & 0x7E) >> 1)
-		{
+	while (buffer != NULL) {
+		switch ((frameType & 0x7E) >> 1) {
 		case 32:
 			LOG(INFO) << "VPS size:" << size << " bufSize:" << bufSize;
 			m_vps.assign((char *)buffer, size);
@@ -48,14 +46,12 @@ std::list<std::pair<unsigned char *, size_t>> H265_V4L2DeviceSource::splitFrames
 		case 19:
 		case 20:
 			LOG(INFO) << "IDR size:" << size << " bufSize:" << bufSize;
-			if (m_repeatConfig && !m_vps.empty() && !m_sps.empty() && !m_pps.empty())
-			{
+			if (m_repeatConfig && !m_vps.empty() && !m_sps.empty() && !m_pps.empty()) {
 				frameList.push_back(std::pair<unsigned char *, size_t>((unsigned char *)m_vps.c_str(), m_vps.size()));
 				frameList.push_back(std::pair<unsigned char *, size_t>((unsigned char *)m_sps.c_str(), m_sps.size()));
 				frameList.push_back(std::pair<unsigned char *, size_t>((unsigned char *)m_pps.c_str(), m_pps.size()));
 			}
-			if (!m_vps.empty() && !m_sps.empty() && !m_pps.empty())
-			{
+			if (!m_vps.empty() && !m_sps.empty() && !m_pps.empty()) {
 				std::lock_guard<std::mutex> lock(m_lastFrameMutex);
 				m_lastFrame.assign(H264marker, sizeof(H264marker));
 				m_lastFrame.append(m_vps.c_str(), m_vps.size());
@@ -71,8 +67,7 @@ std::list<std::pair<unsigned char *, size_t>> H265_V4L2DeviceSource::splitFrames
 			break;
 		}
 
-		if (!m_vps.empty() && !m_sps.empty() && !m_pps.empty())
-		{
+		if (!m_vps.empty() && !m_sps.empty() && !m_pps.empty()) {
 			char *vps_base64 = base64Encode(m_vps.c_str(), m_vps.size());
 			char *sps_base64 = base64Encode(m_sps.c_str(), m_sps.size());
 			char *pps_base64 = base64Encode(m_pps.c_str(), m_pps.size());
@@ -94,8 +89,7 @@ std::list<std::pair<unsigned char *, size_t>> H265_V4L2DeviceSource::splitFrames
 	return frameList;
 }
 
-std::list<std::string> H265_V4L2DeviceSource::getInitFrames()
-{
+std::list<std::string> H265_V4L2DeviceSource::getInitFrames() {
 	std::list<std::string> frameList;
 	frameList.push_back(this->getFrameWithMarker(m_vps));
 	frameList.push_back(this->getFrameWithMarker(m_sps));
@@ -103,11 +97,9 @@ std::list<std::string> H265_V4L2DeviceSource::getInitFrames()
 	return frameList;
 }
 
-bool H265_V4L2DeviceSource::isKeyFrame(const char *buffer, int size)
-{
+bool H265_V4L2DeviceSource::isKeyFrame(const char *buffer, int size) {
 	bool res = false;
-	if (size > 4)
-	{
+	if (size > 4) {
 		int frameType = (buffer[4] & 0x7E) >> 1;
 		res = (frameType == 19 || frameType == 20);
 	}

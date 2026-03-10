@@ -20,11 +20,14 @@
 const char H264marker[] = {0, 0, 0, 1};
 const char H264shortmarker[] = {0, 0, 1};
 
-class H26X_V4L2DeviceSource : public V4L2DeviceSource
-{
+class H26X_V4L2DeviceSource : public V4L2DeviceSource {
 protected:
-	H26X_V4L2DeviceSource(UsageEnvironment &env, DeviceInterface *device, int outputFd, unsigned int queueSize, CaptureMode captureMode, bool repeatConfig, bool keepMarker)
-		: V4L2DeviceSource(env, device, outputFd, queueSize, captureMode), m_repeatConfig(repeatConfig), m_keepMarker(keepMarker) {}
+	H26X_V4L2DeviceSource(
+			UsageEnvironment &env, DeviceInterface *device, int outputFd, unsigned int queueSize,
+			CaptureMode captureMode, bool repeatConfig, bool keepMarker
+	)
+		: V4L2DeviceSource(env, device, outputFd, queueSize, captureMode), m_repeatConfig(repeatConfig),
+		  m_keepMarker(keepMarker) {}
 
 	virtual ~H26X_V4L2DeviceSource() {}
 

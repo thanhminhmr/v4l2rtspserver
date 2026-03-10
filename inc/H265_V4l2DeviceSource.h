@@ -14,16 +14,20 @@
 // project
 #include "H26x_V4l2DeviceSource.h"
 
-class H265_V4L2DeviceSource : public H26X_V4L2DeviceSource
-{
+class H265_V4L2DeviceSource : public H26X_V4L2DeviceSource {
 public:
-	static H265_V4L2DeviceSource *createNew(UsageEnvironment &env, DeviceInterface *device, int outputFd, unsigned int queueSize, CaptureMode captureMode, bool repeatConfig, bool keepMarker)
-	{
+	static H265_V4L2DeviceSource *createNew(
+			UsageEnvironment &env, DeviceInterface *device, int outputFd, unsigned int queueSize,
+			CaptureMode captureMode, bool repeatConfig, bool keepMarker
+	) {
 		return new H265_V4L2DeviceSource(env, device, outputFd, queueSize, captureMode, repeatConfig, keepMarker);
 	}
 
 protected:
-	H265_V4L2DeviceSource(UsageEnvironment &env, DeviceInterface *device, int outputFd, unsigned int queueSize, CaptureMode captureMode, bool repeatConfig, bool keepMarker)
+	H265_V4L2DeviceSource(
+			UsageEnvironment &env, DeviceInterface *device, int outputFd, unsigned int queueSize,
+			CaptureMode captureMode, bool repeatConfig, bool keepMarker
+	)
 		: H26X_V4L2DeviceSource(env, device, outputFd, queueSize, captureMode, repeatConfig, keepMarker) {}
 
 	// overide V4L2DeviceSource

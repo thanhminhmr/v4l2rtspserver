@@ -15,72 +15,60 @@
 #include <Base64.hh>
 
 // project
-#include "logger.h"
 #include "H26x_V4l2DeviceSource.h"
+#include "logger.h"
 
 // extract a frame
-unsigned char *H26X_V4L2DeviceSource::extractFrame(unsigned char *frame, size_t &size, size_t &outsize, int &frameType)
-{
+unsigned char *
+H26X_V4L2DeviceSource::extractFrame(unsigned char *frame, size_t &size, size_t &outsize, int &frameType) {
 	unsigned char *outFrame = NULL;
 	outsize = 0;
 	unsigned int markerlength = 0;
 	frameType = 0;
 
 	unsigned char *startFrame = (unsigned char *)memmem(frame, size, H264marker, sizeof(H264marker));
-	if (startFrame != NULL)
-	{
+	if (startFrame != NULL) {
 		markerlength = sizeof(H264marker);
-	}
-	else
-	{
+	} else {
 		startFrame = (unsigned char *)memmem(frame, size, H264shortmarker, sizeof(H264shortmarker));
-		if (startFrame != NULL)
-		{
+		if (startFrame != NULL) {
 			markerlength = sizeof(H264shortmarker);
 		}
 	}
-	if (startFrame != NULL)
-	{
+	if (startFrame != NULL) {
 		frameType = startFrame[markerlength];
 
 		int remainingSize = size - (startFrame - frame + markerlength);
-		unsigned char *endFrame = (unsigned char *)memmem(&startFrame[markerlength], remainingSize, H264marker, sizeof(H264marker));
-		if (endFrame == NULL)
-		{
-			endFrame = (unsigned char *)memmem(&startFrame[markerlength], remainingSize, H264shortmarker, sizeof(H264shortmarker));
+		unsigned char *endFrame =
+				(unsigned char *)memmem(&startFrame[markerlength], remainingSize, H264marker, sizeof(H264marker));
+		if (endFrame == NULL) {
+			endFrame = (unsigned char *)memmem(
+					&startFrame[markerlength], remainingSize, H264shortmarker, sizeof(H264shortmarker)
+			);
 		}
 
-		if (m_keepMarker)
-		{
+		if (m_keepMarker) {
 			size -= startFrame - frame;
 			outFrame = startFrame;
-		}
-		else
-		{
+		} else {
 			size -= startFrame - frame + markerlength;
 			outFrame = &startFrame[markerlength];
 		}
 
-		if (endFrame != NULL)
-		{
+		if (endFrame != NULL) {
 			outsize = endFrame - outFrame;
-		}
-		else
-		{
+		} else {
 			outsize = size;
 		}
 		size -= outsize;
-	}
-	else if (size >= sizeof(H264shortmarker))
-	{
+	} else if (size >= sizeof(H264shortmarker)) {
 		LOG(INFO) << "No marker found";
 	}
 
 	return outFrame;
 }
 
-std::string H26X_V4L2DeviceSource::getFrameWithMarker(const std::string &frame)
-{
+std::string H26X_V4L2DeviceSource::getFrameWithMarker(const std::string &frame) {
 	std::string frameWithMarker;
 	frameWithMarker.append(H264marker, sizeof(H264marker));
 	frameWithMarker.append(frame);

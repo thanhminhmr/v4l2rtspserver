@@ -15,16 +15,17 @@
 
 #include <list>
 
-#include <alsa/asoundlib.h>
 #include "logger.h"
+#include <alsa/asoundlib.h>
 
 #include "DeviceInterface.h"
 
-struct ALSACaptureParameters
-{
-	ALSACaptureParameters(const char *devname, const std::list<snd_pcm_format_t> &formatList, unsigned int sampleRate, unsigned int channels) : m_devName(devname), m_formatList(formatList), m_sampleRate(sampleRate), m_channels(channels)
-	{
-	}
+struct ALSACaptureParameters {
+	ALSACaptureParameters(
+			const char *devname, const std::list<snd_pcm_format_t> &formatList, unsigned int sampleRate,
+			unsigned int channels
+	)
+		: m_devName(devname), m_formatList(formatList), m_sampleRate(sampleRate), m_channels(channels) {}
 
 	std::string m_devName;
 	std::list<snd_pcm_format_t> m_formatList;
@@ -32,8 +33,7 @@ struct ALSACaptureParameters
 	unsigned int m_channels;
 };
 
-class ALSACapture : public DeviceInterface
-{
+class ALSACapture : public DeviceInterface {
 public:
 	static ALSACapture *createNew(const ALSACaptureParameters &params);
 	virtual ~ALSACapture();

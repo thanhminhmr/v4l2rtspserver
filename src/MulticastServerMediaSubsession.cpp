@@ -12,13 +12,17 @@
 // -----------------------------------------
 //    ServerMediaSubsession for Multicast
 // -----------------------------------------
-MulticastServerMediaSubsession *MulticastServerMediaSubsession::createNew(UsageEnvironment &env, struct in_addr destinationAddress, Port rtpPortNum, Port rtcpPortNum, int ttl, StreamReplicator *replicator)
-{
+MulticastServerMediaSubsession *MulticastServerMediaSubsession::createNew(
+		UsageEnvironment &env, struct in_addr destinationAddress, Port rtpPortNum, Port rtcpPortNum, int ttl,
+		StreamReplicator *replicator
+) {
 	return new MulticastServerMediaSubsession(env, destinationAddress, rtpPortNum, rtcpPortNum, ttl, replicator);
 }
 
-RTPSink *MulticastServerMediaSubsession::createRtpSink(UsageEnvironment &env, struct in_addr destinationAddress, Port rtpPortNum, Port rtcpPortNum, int ttl, StreamReplicator *replicator)
-{
+RTPSink *MulticastServerMediaSubsession::createRtpSink(
+		UsageEnvironment &env, struct in_addr destinationAddress, Port rtpPortNum, Port rtcpPortNum, int ttl,
+		StreamReplicator *replicator
+) {
 	// Create a source
 	FramedSource *source = replicator->createStreamReplica();
 	FramedSource *videoSource = createSource(env, source, m_format);
@@ -34,7 +38,8 @@ RTPSink *MulticastServerMediaSubsession::createRtpSink(UsageEnvironment &env, st
 	Groupsock *rtpGroupsock = new Groupsock(env, groupAddress, rtpPortNum, ttl);
 
 	// Create a RTP sink
-	m_rtpSink = createSink(env, rtpGroupsock, 96, m_format, dynamic_cast<V4L2DeviceSource *>(replicator->inputSource()));
+	m_rtpSink =
+			createSink(env, rtpGroupsock, 96, m_format, dynamic_cast<V4L2DeviceSource *>(replicator->inputSource()));
 
 	// Create 'RTCP instance'
 	const unsigned maxCNAMElen = 100;
@@ -51,15 +56,12 @@ RTPSink *MulticastServerMediaSubsession::createRtpSink(UsageEnvironment &env, st
 }
 
 #if LIVEMEDIA_LIBRARY_VERSION_INT < 1610928000
-char const *MulticastServerMediaSubsession::sdpLines()
-{
+char const *MulticastServerMediaSubsession::sdpLines() {
 	int addressFamily = 0;
 #else
-char const *MulticastServerMediaSubsession::sdpLines(int addressFamily)
-{
+char const *MulticastServerMediaSubsession::sdpLines(int addressFamily) {
 #endif
-	if (m_SDPLines[addressFamily].empty())
-	{
+	if (m_SDPLines[addressFamily].empty()) {
 		// Ugly workaround to give SPS/PPS that are get from the RTPSink
 #if LIVEMEDIA_LIBRARY_VERSION_INT < 1610928000
 		m_SDPLines[addressFamily].assign(PassiveServerMediaSubsession::sdpLines());
@@ -71,7 +73,6 @@ char const *MulticastServerMediaSubsession::sdpLines(int addressFamily)
 	return m_SDPLines[addressFamily].c_str();
 }
 
-char const *MulticastServerMediaSubsession::getAuxSDPLine(RTPSink *rtpSink, FramedSource *inputSource)
-{
+char const *MulticastServerMediaSubsession::getAuxSDPLine(RTPSink *rtpSink, FramedSource *inputSource) {
 	return this->getAuxLine(dynamic_cast<V4L2DeviceSource *>(m_replicator->inputSource()), rtpSink);
 }

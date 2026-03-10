@@ -11,16 +11,15 @@
 
 #pragma once
 
-#include <string>
 #include <map>
+#include <string>
 
 #include "MediaSink.hh"
 
-class MemoryBufferSink : public MediaSink
-{
+class MemoryBufferSink : public MediaSink {
 public:
-	static MemoryBufferSink *createNew(UsageEnvironment &env, unsigned int bufferSize, unsigned int sliceDuration, unsigned int nbSlices = 5)
-	{
+	static MemoryBufferSink *
+	createNew(UsageEnvironment &env, unsigned int bufferSize, unsigned int sliceDuration, unsigned int nbSlices = 5) {
 		return new MemoryBufferSink(env, bufferSize, sliceDuration, nbSlices);
 	}
 
@@ -30,11 +29,10 @@ protected:
 
 	virtual Boolean continuePlaying();
 
-	static void afterGettingFrame(void *clientData, unsigned frameSize,
-								  unsigned numTruncatedBytes,
-								  struct timeval presentationTime,
-								  unsigned durationInMicroseconds)
-	{
+	static void afterGettingFrame(
+			void *clientData, unsigned frameSize, unsigned numTruncatedBytes, struct timeval presentationTime,
+			unsigned durationInMicroseconds
+	) {
 		MemoryBufferSink *sink = (MemoryBufferSink *)clientData;
 		sink->afterGettingFrame(frameSize, numTruncatedBytes, presentationTime);
 	}

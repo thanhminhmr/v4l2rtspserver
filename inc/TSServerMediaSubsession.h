@@ -9,28 +9,34 @@
 
 #pragma once
 
-#include <map>
-#include "UnicastServerMediaSubsession.h"
 #include "MemoryBufferSink.h"
+#include "UnicastServerMediaSubsession.h"
+#include <map>
 
 // -----------------------------------------
 //    ServerMediaSubsession for HLS
 // -----------------------------------------
-class TSServerMediaSubsession : public UnicastServerMediaSubsession
-{
+class TSServerMediaSubsession : public UnicastServerMediaSubsession {
 public:
-	static TSServerMediaSubsession *createNew(UsageEnvironment &env, StreamReplicator *videoreplicator, StreamReplicator *audioreplicator, unsigned int sliceDuration)
-	{
+	static TSServerMediaSubsession *createNew(
+			UsageEnvironment &env, StreamReplicator *videoreplicator, StreamReplicator *audioreplicator,
+			unsigned int sliceDuration
+	) {
 		return new TSServerMediaSubsession(env, videoreplicator, audioreplicator, sliceDuration);
 	}
 
 protected:
-	TSServerMediaSubsession(UsageEnvironment &env, StreamReplicator *videoreplicator, StreamReplicator *audioreplicator, unsigned int sliceDuration);
+	TSServerMediaSubsession(
+			UsageEnvironment &env, StreamReplicator *videoreplicator, StreamReplicator *audioreplicator,
+			unsigned int sliceDuration
+	);
 	virtual ~TSServerMediaSubsession();
 
 	virtual float getCurrentNPT(void *streamToken);
 	virtual float duration() const;
-	virtual void seekStream(unsigned clientSessionId, void *streamToken, double &seekNPT, double streamDuration, u_int64_t &numBytes);
+	virtual void seekStream(
+			unsigned clientSessionId, void *streamToken, double &seekNPT, double streamDuration, u_int64_t &numBytes
+	);
 	virtual FramedSource *getStreamSource(void *streamToken);
 
 protected:

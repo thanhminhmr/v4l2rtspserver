@@ -1,0 +1,12 @@
+---
+Language: Cpp
+BasedOnStyle: LLVM
+AlignAfterOpenBracket: BlockIndent
+IndentWidth: 4
+TabWidth: 4
+ContinuationIndentWidth: 8
+UseTab: ForContinuationAndIndentation
+ColumnLimit: 120
+MaxEmptyLinesToKeep: 2
+AccessModifierOffset: -4
+...

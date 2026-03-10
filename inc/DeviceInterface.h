@@ -13,8 +13,7 @@
 // ---------------------------------
 // Device Interface
 // ---------------------------------
-class DeviceInterface
-{
+class DeviceInterface {
 public:
 	virtual size_t read(char *buffer, size_t bufferSize) = 0;
 	virtual int getFd() = 0;

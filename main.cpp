@@ -12,13 +12,13 @@
 **
 ** -------------------------------------------------------------------------*/
 
+#include <dirent.h>
+#include <errno.h>
+#include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <errno.h>
-#include <signal.h>
 #include <sys/ioctl.h>
-#include <dirent.h>
 
 #include <sstream>
 
@@ -31,15 +31,14 @@
 #include "V4l2Device.h"
 #include "V4l2Output.h"
 
-#include "V4l2RTSPServer.h"
 #include "DeviceSourceFactory.h"
+#include "V4l2RTSPServer.h"
 
 // -----------------------------------------
 //    signal handler
 // -----------------------------------------
 char quit = 0;
-void sighandler(int n)
-{
+void sighandler(int n) {
 	printf("SIGINT\n");
 	quit = 1;
 }
@@ -47,19 +46,16 @@ void sighandler(int n)
 // -------------------------------------------------------
 //    split video,audio device
 // -------------------------------------------------------
-void decodeDevice(const std::string &device, std::string &videoDev, std::string &audioDev)
-{
+void decodeDevice(const std::string &device, std::string &videoDev, std::string &audioDev) {
 	std::istringstream is(device);
 	getline(is, videoDev, ',');
 	getline(is, audioDev);
 }
 
-std::string getDeviceName(const std::string &devicePath)
-{
+std::string getDeviceName(const std::string &devicePath) {
 	std::string deviceName(devicePath);
 	size_t pos = deviceName.find_last_of('/');
-	if (pos != std::string::npos)
-	{
+	if (pos != std::string::npos) {
 		deviceName.erase(0, pos + 1);
 	}
 	return deviceName;
@@ -68,8 +64,7 @@ std::string getDeviceName(const std::string &devicePath)
 // -----------------------------------------
 //    entry point
 // -----------------------------------------
-int main(int argc, char **argv)
-{
+int main(int argc, char **argv) {
 	// default parameters
 	const char *dev_name = "/dev/video0,/dev/video0";
 	unsigned int format = ~0;
@@ -107,22 +102,21 @@ int main(int argc, char **argv)
 	snd_pcm_format_t audioFmt = SND_PCM_FORMAT_UNKNOWN;
 #endif
 	const char *defaultPort = getenv("PORT");
-	if (defaultPort != NULL)
-	{
+	if (defaultPort != NULL) {
 		rtspPort = atoi(defaultPort);
 	}
 
 	// decode parameters
 	int c = 0;
-	while ((c = getopt(argc, argv, "v::Q:O:b:"
-								   "I:P:p:m::u:M::ct:S::x:X"
-								   "R:U:"
-								   "rwBsf::F:W:H:G:"
-								   "A:C:a:"
-								   "Vh")) != -1)
-	{
-		switch (c)
-		{
+	while ((c =
+					getopt(argc, argv,
+						   "v::Q:O:b:"
+						   "I:P:p:m::u:M::ct:S::x:X"
+						   "R:U:"
+						   "rwBsf::F:W:H:G:"
+						   "A:C:a:"
+						   "Vh")) != -1) {
+		switch (c) {
 		case 'v':
 			verbose = 1;
 			if (optarg && *optarg == 'v')
@@ -200,8 +194,7 @@ int main(int argc, char **argv)
 			break;
 		case 'f':
 			format = V4l2Device::fourcc(optarg);
-			if (format)
-			{
+			if (format) {
 				videoformatList.push_back(format);
 			};
 			break;
@@ -228,8 +221,7 @@ int main(int argc, char **argv)
 			break;
 		case 'a':
 			audioFmt = V4l2RTSPServer::decodeAudioFormat(optarg);
-			if (audioFmt != SND_PCM_FORMAT_UNKNOWN)
-			{
+			if (audioFmt != SND_PCM_FORMAT_UNKNOWN) {
 				audioFmtList.push_back(audioFmt);
 			};
 			break;
@@ -243,11 +235,13 @@ int main(int argc, char **argv)
 
 		// help
 		case 'h':
-		default:
-		{
+		default: {
 			std::cout << argv[0] << " [-v[v]] [-Q queueSize] [-O file]" << std::endl;
-			std::cout << "\t          [-I interface] [-P RTSP port] [-p RTSP/HTTP port] [-m multicast url] [-u unicast url] [-M multicast addr] [-c] [-t timeout] [-T] [-S[duration]]" << std::endl;
-			std::cout << "\t          [-r] [-w] [-s] [-f[format] [-W width] [-H height] [-F fps] [device] [device]" << std::endl;
+			std::cout << "\t          [-I interface] [-P RTSP port] [-p RTSP/HTTP port] [-m multicast url] [-u unicast "
+						 "url] [-M multicast addr] [-c] [-t timeout] [-T] [-S[duration]]"
+					  << std::endl;
+			std::cout << "\t          [-r] [-w] [-s] [-f[format] [-W width] [-H height] [-F fps] [device] [device]"
+					  << std::endl;
 			std::cout << "\t -v               : verbose" << std::endl;
 			std::cout << "\t -vv              : very verbose" << std::endl;
 			std::cout << "\t -Q <length>      : Number of frame queue  (default " << queueSize << ")" << std::endl;
@@ -263,53 +257,61 @@ int main(int argc, char **argv)
 			std::cout << "\t -u <url>         : unicast url (default " << url << ")" << std::endl;
 			std::cout << "\t -m <url>         : multicast url (default " << murl << ")" << std::endl;
 			std::cout << "\t -M <addr>        : multicast group:port (default is random_address:20000)" << std::endl;
-			std::cout << "\t -c               : don't repeat config (default repeat config before IDR frame)" << std::endl;
-			std::cout << "\t -t <timeout>     : RTCP expiration timeout in seconds (default " << timeout << ")" << std::endl;
-			std::cout << "\t -S[<duration>]   : enable HLS & MPEG-DASH with segment duration  in seconds (default " << defaultHlsSegment << ")" << std::endl;
+			std::cout << "\t -c               : don't repeat config (default repeat config before IDR frame)"
+					  << std::endl;
+			std::cout << "\t -t <timeout>     : RTCP expiration timeout in seconds (default " << timeout << ")"
+					  << std::endl;
+			std::cout << "\t -S[<duration>]   : enable HLS & MPEG-DASH with segment duration  in seconds (default "
+					  << defaultHlsSegment << ")" << std::endl;
 #ifndef NO_OPENSSL
 			std::cout << "\t -x <sslkeycert>  : enable SRTP" << std::endl;
 			std::cout << "\t -X               : enable RTSPS" << std::endl;
 #endif
 
 			std::cout << "\t V4L2 options" << std::endl;
-			std::cout << "\t -r               : V4L2 capture using read interface (default use memory mapped buffers)" << std::endl;
-			std::cout << "\t -w               : V4L2 capture using write interface (default use memory mapped buffers)" << std::endl;
-			std::cout << "\t -B               : V4L2 capture using blocking mode (default use non-blocking mode)" << std::endl;
-			std::cout << "\t -s               : V4L2 capture using live555 mainloop (default use a reader thread)" << std::endl;
-			std::cout << "\t -f               : V4L2 capture using current capture format (-W,-H,-F are ignored)" << std::endl;
+			std::cout << "\t -r               : V4L2 capture using read interface (default use memory mapped buffers)"
+					  << std::endl;
+			std::cout << "\t -w               : V4L2 capture using write interface (default use memory mapped buffers)"
+					  << std::endl;
+			std::cout << "\t -B               : V4L2 capture using blocking mode (default use non-blocking mode)"
+					  << std::endl;
+			std::cout << "\t -s               : V4L2 capture using live555 mainloop (default use a reader thread)"
+					  << std::endl;
+			std::cout << "\t -f               : V4L2 capture using current capture format (-W,-H,-F are ignored)"
+					  << std::endl;
 			std::cout << "\t -f<format>       : V4L2 capture using format (-W,-H,-F are used)" << std::endl;
 			std::cout << "\t -W <width>       : V4L2 capture width (default " << width << ")" << std::endl;
 			std::cout << "\t -H <height>      : V4L2 capture height (default " << height << ")" << std::endl;
 			std::cout << "\t -F <fps>         : V4L2 capture framerate (default " << fps << ")" << std::endl;
-			std::cout << "\t -G <w>x<h>[x<f>] : V4L2 capture format (default " << width << "x" << height << "x" << fps << ")" << std::endl;
+			std::cout << "\t -G <w>x<h>[x<f>] : V4L2 capture format (default " << width << "x" << height << "x" << fps
+					  << ")" << std::endl;
 
 #ifdef HAVE_ALSA
 			std::cout << "\t ALSA options" << std::endl;
-			std::cout << "\t -A freq          : ALSA capture frequency and channel (default " << audioFreq << ")" << std::endl;
+			std::cout << "\t -A freq          : ALSA capture frequency and channel (default " << audioFreq << ")"
+					  << std::endl;
 			std::cout << "\t -C channels      : ALSA capture channels (default " << audioNbChannels << ")" << std::endl;
 			std::cout << "\t -a fmt           : ALSA capture audio format (default S16_BE)" << std::endl;
 #endif
 
 			std::cout << "\t Devices :" << std::endl;
-			std::cout << "\t [V4L2 device][,ALSA device] : V4L2 capture device or/and ALSA capture device (default " << dev_name << ")" << std::endl;
+			std::cout << "\t [V4L2 device][,ALSA device] : V4L2 capture device or/and ALSA capture device (default "
+					  << dev_name << ")" << std::endl;
 			exit(0);
 		}
 		}
 	}
 	std::list<std::string> devList;
-	while (optind < argc)
-	{
+	while (optind < argc) {
 		devList.push_back(argv[optind]);
 		optind++;
 	}
-	if (devList.empty())
-	{
+	if (devList.empty()) {
 		devList.push_back(dev_name);
 	}
 
 	// default format tries
-	if ((videoformatList.empty()) && (format != 0))
-	{
+	if ((videoformatList.empty()) && (format != 0)) {
 		videoformatList.push_back(V4L2_PIX_FMT_HEVC);
 		videoformatList.push_back(V4L2_PIX_FMT_H264);
 		videoformatList.push_back(V4L2_PIX_FMT_MJPEG);
@@ -319,8 +321,7 @@ int main(int argc, char **argv)
 
 #ifdef HAVE_ALSA
 	// default audio format tries
-	if (audioFmtList.empty())
-	{
+	if (audioFmtList.empty()) {
 		audioFmtList.push_back(SND_PCM_FORMAT_S16_LE);
 		audioFmtList.push_back(SND_PCM_FORMAT_S16_BE);
 	}
@@ -331,13 +332,12 @@ int main(int argc, char **argv)
 	LOG(NOTICE) << "Version: " << VERSION << " live555 version:" << LIVEMEDIA_LIBRARY_VERSION_STRING;
 
 	// create RTSP server
-	V4l2RTSPServer rtspServer(rtspPort, rtspOverHTTPPort, timeout, hlsSegment, userPasswordList, realm, webroot, sslKeyCert, enableRTSPS);
-	if (!rtspServer.available())
-	{
+	V4l2RTSPServer rtspServer(
+			rtspPort, rtspOverHTTPPort, timeout, hlsSegment, userPasswordList, realm, webroot, sslKeyCert, enableRTSPS
+	);
+	if (!rtspServer.available()) {
 		LOG(ERROR) << "Failed to create RTSP server: " << rtspServer.getResultMsg();
-	}
-	else
-	{
+	} else {
 		// decode multicast info
 		struct in_addr destinationAddress;
 		unsigned short rtpPortNum;
@@ -347,8 +347,7 @@ int main(int argc, char **argv)
 		std::list<V4l2Output *> outList;
 		int nbSource = 0;
 		std::list<std::string>::iterator devIt;
-		for (devIt = devList.begin(); devIt != devList.end(); ++devIt)
-		{
+		for (devIt = devList.begin(); devIt != devList.end(); ++devIt) {
 			std::string deviceName(*devIt);
 
 			std::string videoDev;
@@ -357,8 +356,7 @@ int main(int argc, char **argv)
 
 			std::string baseUrl;
 			std::string output(outputFile);
-			if (devList.size() > 1)
-			{
+			if (devList.size() > 1) {
 				baseUrl = getDeviceName(videoDev);
 				baseUrl.append("_");
 				// output is not compatible with multiple device
@@ -368,11 +366,9 @@ int main(int argc, char **argv)
 			V4l2Output *out = NULL;
 			V4L2DeviceParameters inParam(videoDev.c_str(), videoformatList, width, height, fps, ioTypeIn, openflags);
 			StreamReplicator *videoReplicator = rtspServer.CreateVideoReplicator(
-				inParam,
-				queueSize, captureMode, repeatConfig,
-				output, ioTypeOut, out);
-			if (out != NULL)
-			{
+					inParam, queueSize, captureMode, repeatConfig, output, ioTypeOut, out
+			);
+			if (out != NULL) {
 				outList.push_back(out);
 			}
 
@@ -380,48 +376,44 @@ int main(int argc, char **argv)
 			StreamReplicator *audioReplicator = NULL;
 #ifdef HAVE_ALSA
 			audioReplicator = rtspServer.CreateAudioReplicator(
-				audioDev, audioFmtList, audioFreq, audioNbChannels, verbose,
-				queueSize, captureMode);
+					audioDev, audioFmtList, audioFreq, audioNbChannels, verbose, queueSize, captureMode
+			);
 #endif
 
 			// Create Multicast Session
-			if (multicast)
-			{
-				ServerMediaSession *sms = rtspServer.AddMulticastSession(baseUrl + murl, destinationAddress, rtpPortNum, rtcpPortNum, videoReplicator, audioReplicator);
-				if (sms)
-				{
+			if (multicast) {
+				ServerMediaSession *sms = rtspServer.AddMulticastSession(
+						baseUrl + murl, destinationAddress, rtpPortNum, rtcpPortNum, videoReplicator, audioReplicator
+				);
+				if (sms) {
 					nbSource += sms->numSubsessions();
 				}
 			}
 
 			// Create HLS Session
-			if (hlsSegment > 0)
-			{
-				ServerMediaSession *sms = rtspServer.AddHlsSession(baseUrl + tsurl, hlsSegment, videoReplicator, audioReplicator);
-				if (sms)
-				{
+			if (hlsSegment > 0) {
+				ServerMediaSession *sms =
+						rtspServer.AddHlsSession(baseUrl + tsurl, hlsSegment, videoReplicator, audioReplicator);
+				if (sms) {
 					nbSource += sms->numSubsessions();
 				}
 			}
 
 			// Create Unicast Session
 			ServerMediaSession *sms = rtspServer.AddUnicastSession(baseUrl + url, videoReplicator, audioReplicator);
-			if (sms)
-			{
+			if (sms) {
 				nbSource += sms->numSubsessions();
 			}
 		}
 
-		if (nbSource > 0)
-		{
+		if (nbSource > 0) {
 			// main loop
 			signal(SIGINT, sighandler);
 			rtspServer.eventLoop(&quit);
 			LOG(NOTICE) << "Exiting....";
 		}
 
-		while (!outList.empty())
-		{
+		while (!outList.empty()) {
 			V4l2Output *out = outList.back();
 			delete out;
 			outList.pop_back();

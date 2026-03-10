@@ -11,11 +11,11 @@
 
 #pragma once
 
-#include <string>
-#include <list>
-#include <iostream>
 #include <iomanip>
+#include <iostream>
+#include <list>
 #include <mutex>
+#include <string>
 #include <thread>
 
 // live555
@@ -26,15 +26,14 @@
 // -----------------------------------------
 //    Video Device Source
 // -----------------------------------------
-class V4L2DeviceSource : public FramedSource
-{
+class V4L2DeviceSource : public FramedSource {
 public:
 	// ---------------------------------
 	// Captured frame
 	// ---------------------------------
-	struct Frame
-	{
-		Frame(char *buffer, int size, timeval timestamp, char *allocatedBuffer = NULL) : m_buffer(buffer), m_size(size), m_timestamp(timestamp), m_allocatedBuffer(allocatedBuffer) {};
+	struct Frame {
+		Frame(char *buffer, int size, timeval timestamp, char *allocatedBuffer = NULL)
+			: m_buffer(buffer), m_size(size), m_timestamp(timestamp), m_allocatedBuffer(allocatedBuffer) {};
 		Frame(const Frame &);
 		Frame &operator=(const Frame &);
 		~Frame() { delete[] m_allocatedBuffer; };
@@ -48,8 +47,7 @@ public:
 	// ---------------------------------
 	// Compute simple stats
 	// ---------------------------------
-	class Stats
-	{
+	class Stats {
 	public:
 		Stats(const std::string &msg) : m_fps(0), m_fps_sec(0), m_size(0), m_msg(msg) {};
 
@@ -66,18 +64,15 @@ public:
 	// ---------------------------------
 	// Capture Mode
 	// ---------------------------------
-	enum CaptureMode
-	{
-		CAPTURE_LIVE555_THREAD = 0,
-		CAPTURE_INTERNAL_THREAD,
-		NOCAPTURE
-	};
+	enum CaptureMode { CAPTURE_LIVE555_THREAD = 0, CAPTURE_INTERNAL_THREAD, NOCAPTURE };
 
 public:
-	static V4L2DeviceSource *createNew(UsageEnvironment &env, DeviceInterface *device, int outputFd, unsigned int queueSize, CaptureMode captureMode);
+	static V4L2DeviceSource *createNew(
+			UsageEnvironment &env, DeviceInterface *device, int outputFd, unsigned int queueSize,
+			CaptureMode captureMode
+	);
 	std::string getAuxLine() { return m_auxLine; }
-	std::string getLastFrame()
-	{
+	std::string getLastFrame() {
 		std::lock_guard<std::mutex> lock(m_lastFrameMutex);
 		std::string frame(m_lastFrame);
 		return frame;
@@ -88,14 +83,19 @@ public:
 	virtual bool isKeyFrame(const char *, int) { return false; }
 
 protected:
-	V4L2DeviceSource(UsageEnvironment &env, DeviceInterface *device, int outputFd, unsigned int queueSize, CaptureMode captureMode);
+	V4L2DeviceSource(
+			UsageEnvironment &env, DeviceInterface *device, int outputFd, unsigned int queueSize,
+			CaptureMode captureMode
+	);
 	virtual ~V4L2DeviceSource();
 
 protected:
 	virtual void *thread();
 	static void deliverFrameStub(void *clientData) { ((V4L2DeviceSource *)clientData)->deliverFrame(); };
 	void deliverFrame();
-	static void incomingPacketHandlerStub(void *clientData, int mask) { ((V4L2DeviceSource *)clientData)->incomingPacketHandler(); };
+	static void incomingPacketHandlerStub(void *clientData, int mask) {
+		((V4L2DeviceSource *)clientData)->incomingPacketHandler();
+	};
 	void incomingPacketHandler();
 	int getNextFrame();
 	void processFrame(char *frame, int frameSize, const timeval &ref);
