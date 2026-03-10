@@ -277,7 +277,7 @@ public:
 
 	void setTLS(const std::string &sslCert, bool enableRTSPS = false, bool encryptSRTP = true)
 	{
-#if LIVEMEDIA_LIBRARY_VERSION_INT >= 1642723200
+#if (LIVEMEDIA_LIBRARY_VERSION_INT >= 1642723200) && (LIVEMEDIA_LIBRARY_VERSION_INT < 1772064000)
 		if (!sslCert.empty())
 		{
 			this->setTLSFileNames(sslCert.c_str(), sslCert.c_str());
@@ -303,7 +303,7 @@ public:
 
 	bool isRTSPS()
 	{
-#if LIVEMEDIA_LIBRARY_VERSION_INT >= 1642723200
+#if (LIVEMEDIA_LIBRARY_VERSION_INT >= 1642723200) && (LIVEMEDIA_LIBRARY_VERSION_INT < 1772064000)
 		return fOurConnectionsUseTLS;
 #else
 		return false;
@@ -312,7 +312,7 @@ public:
 
 	bool isSRTP()
 	{
-#if LIVEMEDIA_LIBRARY_VERSION_INT >= 1642723200
+#if (LIVEMEDIA_LIBRARY_VERSION_INT >= 1642723200) && (LIVEMEDIA_LIBRARY_VERSION_INT < 1772064000)
 		return fWeServeSRTP;
 #else
 		return false;
@@ -321,7 +321,7 @@ public:
 
 	bool isSRTPEncrypted()
 	{
-#if LIVEMEDIA_LIBRARY_VERSION_INT >= 1642723200
+#if (LIVEMEDIA_LIBRARY_VERSION_INT >= 1642723200) && (LIVEMEDIA_LIBRARY_VERSION_INT < 1772064000)
 		return fWeEncryptSRTP;
 #else
 		return false;
