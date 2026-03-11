@@ -9,8 +9,12 @@
 **
 ** -------------------------------------------------------------------------*/
 
+#include <algorithm>
+#include <cstdint>
+#include <cstring>
 #include <fcntl.h>
 #include <iomanip>
+#include <memory>
 #include <sstream>
 
 // project
@@ -140,7 +144,7 @@ void V4L2DeviceSource::deliverFrame() {
 					   << "ms\tqueue:" << m_captureQueue.size();
 
 			fPresentationTime = frame->m_timestamp;
-			memcpy(fTo, frame->m_buffer, fFrameSize);
+			std::copy_n(frame->m_buffer, fFrameSize, fTo);
 			delete frame;
 
 			if (!m_captureQueue.empty()) {
@@ -167,16 +171,14 @@ void V4L2DeviceSource::incomingPacketHandler() {
 int V4L2DeviceSource::getNextFrame() {
 	timeval ref;
 	gettimeofday(&ref, nullptr);
-	char *buffer = new char[m_device->getBufferSize()];
-	int frameSize = m_device->read(buffer, m_device->getBufferSize());
+	auto buffer = std::make_unique<char[]>(m_device->getBufferSize());
+	int frameSize = m_device->read(buffer.get(), m_device->getBufferSize());
 	if (frameSize < 0) {
 		LOG(NOTICE) << "V4L2DeviceSource::getNextFrame errno:" << errno << " " << strerror(errno);
-		delete[] buffer;
 	} else if (frameSize == 0) {
 		LOG(DEBUG) << "V4L2DeviceSource::getNextFrame no data errno:" << errno << " " << strerror(errno);
-		delete[] buffer;
 	} else {
-		this->postFrame(buffer, frameSize, ref);
+		this->postFrame(buffer.release(), frameSize, ref);
 	}
 	return frameSize;
 }
@@ -206,16 +208,17 @@ void V4L2DeviceSource::processFrame(char *frame, int frameSize, const timeval &r
 	timeval diff;
 	timersub(&tv, &ref, &diff);
 
-	std::list<std::pair<unsigned char *, size_t>> frameList = this->splitFrames((unsigned char *)frame, frameSize);
+	std::list<std::pair<std::uint8_t *, size_t>> frameList =
+			this->splitFrames(reinterpret_cast<std::uint8_t *>(frame), frameSize);
 	while (!frameList.empty()) {
-		std::pair<unsigned char *, size_t> &item = frameList.front();
+		std::pair<std::uint8_t *, size_t> &item = frameList.front();
 		size_t size = item.second;
 		char *allocatedBuffer = nullptr;
 		if (frameList.size() == 1) {
 			// last frame will release buffer
 			allocatedBuffer = frame;
 		}
-		queueFrame((char *)item.first, size, ref, allocatedBuffer);
+		queueFrame(reinterpret_cast<char *>(item.first), size, ref, allocatedBuffer);
 		frameList.pop_front();
 
 		LOG(DEBUG) << "queueFrame\ttimestamp:" << ref.tv_sec << "." << ref.tv_usec << "\tsize:" << size
@@ -239,13 +242,13 @@ void V4L2DeviceSource::queueFrame(char *frame, int frameSize, const timeval &tv,
 }
 
 // split packet in frames
-std::list<std::pair<unsigned char *, size_t>> V4L2DeviceSource::splitFrames(unsigned char *frame, unsigned frameSize) {
-	std::list<std::pair<unsigned char *, size_t>> frameList;
+std::list<std::pair<std::uint8_t *, size_t>> V4L2DeviceSource::splitFrames(std::uint8_t *frame, unsigned frameSize) {
+	std::list<std::pair<std::uint8_t *, size_t>> frameList;
 	if (frame != nullptr) {
-		frameList.push_back(std::pair<unsigned char *, size_t>(frame, frameSize));
+		frameList.push_back(std::pair<std::uint8_t *, size_t>(frame, frameSize));
 
 		std::lock_guard<std::mutex> lock(m_lastFrameMutex);
-		m_lastFrame.assign((char *)frame, frameSize);
+		m_lastFrame.assign(reinterpret_cast<char *>(frame), frameSize);
 	}
 	return frameList;
 }

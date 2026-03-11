@@ -12,6 +12,7 @@
 ** -------------------------------------------------------------------------*/
 
 #include <algorithm>
+#include <cstdint>
 #include <fstream>
 #include <sstream>
 
@@ -26,7 +27,7 @@ u_int32_t HTTPServer::HTTPClientConnection::m_ClientSessionId = 0;
 void HTTPServer::HTTPClientConnection::sendHeader(const char *contentType, unsigned int contentLength) {
 	// Construct our response:
 	snprintf(
-			(char *)fResponseBuffer, sizeof fResponseBuffer,
+			reinterpret_cast<char *>(fResponseBuffer), sizeof fResponseBuffer,
 			"HTTP/1.1 200 OK\r\n"
 			"%s"
 			"Server: LIVE555 Streaming Media v%s\r\n"
@@ -38,14 +39,15 @@ void HTTPServer::HTTPClientConnection::sendHeader(const char *contentType, unsig
 	);
 
 	// Send the response header
-	send(fClientOutputSocket, (char const *)fResponseBuffer, strlen((char *)fResponseBuffer), 0);
+	send(fClientOutputSocket, reinterpret_cast<const char *>(fResponseBuffer),
+		 strlen(reinterpret_cast<const char *>(fResponseBuffer)), 0);
 	fResponseBuffer[0] = '\0'; // We've already sent the response.  This tells the calling code not to send it again.
 }
 
 void HTTPServer::HTTPClientConnection::streamSource(const std::string &content) {
-	u_int8_t *buffer = new u_int8_t[content.size()];
-	memcpy(buffer, content.c_str(), content.size());
-	this->streamSource(ByteStreamMemoryBufferSource::createNew(envir(), buffer, content.size()));
+	auto buffer = std::make_unique<std::uint8_t[]>(content.size());
+	std::copy(content.begin(), content.end(), buffer.get());
+	this->streamSource(ByteStreamMemoryBufferSource::createNew(envir(), buffer.release(), content.size()));
 }
 
 void HTTPServer::HTTPClientConnection::streamSource(FramedSource *source) {
@@ -64,7 +66,7 @@ void HTTPServer::HTTPClientConnection::streamSource(FramedSource *source) {
 }
 
 void lookupServerMediaSessionCompletionFuncCallback(void *clientData, ServerMediaSession *sessionLookedUp) {
-	ServerMediaSession **ptr = (ServerMediaSession **)clientData;
+	ServerMediaSession **ptr = reinterpret_cast<ServerMediaSession **>(clientData);
 	*ptr = sessionLookedUp;
 }
 

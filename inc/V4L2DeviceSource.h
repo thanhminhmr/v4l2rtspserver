@@ -11,6 +11,7 @@
 
 #pragma once
 
+#include <cstdint>
 #include <iomanip>
 #include <iostream>
 #include <list>
@@ -102,7 +103,7 @@ protected:
 	void queueFrame(char *frame, int frameSize, const timeval &tv, char *allocatedBuffer = nullptr);
 
 	// split packet in frames
-	virtual std::list<std::pair<unsigned char *, size_t>> splitFrames(unsigned char *frame, unsigned frameSize);
+	virtual std::list<std::pair<std::uint8_t *, size_t>> splitFrames(std::uint8_t *frame, unsigned frameSize);
 
 	// overide FramedSource
 	virtual void doGetNextFrame();
