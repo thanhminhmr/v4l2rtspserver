@@ -146,13 +146,11 @@ public:
 	);
 	char const *getAuxLine(V4L2DeviceSource *source, RTPSink *rtpSink);
 
-	std::string getLastFrame() const {
-		V4L2DeviceSource *deviceSource = dynamic_cast<V4L2DeviceSource *>(m_replicator->inputSource());
-		if (deviceSource) {
+	std::basic_string<uint8_t> getLastFrame() const {
+		if (auto *deviceSource = dynamic_cast<V4L2DeviceSource *>(m_replicator->inputSource())) {
 			return deviceSource->getLastFrame();
-		} else {
-			return "";
 		}
+		return {};
 	}
 
 	std::string getFormat() const { return m_format; }

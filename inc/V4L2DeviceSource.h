@@ -72,29 +72,29 @@ public:
 			CaptureMode captureMode
 	);
 	std::string getAuxLine() { return m_auxLine; }
-	std::string getLastFrame() {
-		std::lock_guard<std::mutex> lock(m_lastFrameMutex);
-		std::string frame(m_lastFrame);
+	std::basic_string<uint8_t> getLastFrame() {
+		std::lock_guard lock(m_lastFrameMutex);
+		std::basic_string frame(m_lastFrame);
 		return frame;
 	}
-	DeviceInterface *getDevice() { return m_device; }
+
+	DeviceInterface *getDevice() const { return m_device; }
 	void postFrame(char *frame, int frameSize, const timeval &ref);
-	virtual std::list<std::string> getInitFrames() { return std::list<std::string>(); }
-	virtual bool isKeyFrame(const char *, int) { return false; }
+	virtual std::list<std::basic_string<uint8_t>> getInitFrames() { return {}; }
 
 protected:
 	V4L2DeviceSource(
 			UsageEnvironment &env, DeviceInterface *device, int outputFd, unsigned int queueSize,
 			CaptureMode captureMode
 	);
-	virtual ~V4L2DeviceSource();
+	~V4L2DeviceSource() override;
 
 protected:
 	virtual void *thread();
-	static void deliverFrameStub(void *clientData) { ((V4L2DeviceSource *)clientData)->deliverFrame(); };
+	static void deliverFrameStub(void *clientData) { static_cast<V4L2DeviceSource *>(clientData)->deliverFrame(); };
 	void deliverFrame();
 	static void incomingPacketHandlerStub(void *clientData, int mask) {
-		((V4L2DeviceSource *)clientData)->incomingPacketHandler();
+		static_cast<V4L2DeviceSource *>(clientData)->incomingPacketHandler();
 	};
 	void incomingPacketHandler();
 	int getNextFrame();
@@ -102,7 +102,7 @@ protected:
 	void queueFrame(char *frame, int frameSize, const timeval &tv, char *allocatedBuffer = nullptr);
 
 	// split packet in frames
-	virtual std::list<std::pair<unsigned char *, size_t>> splitFrames(unsigned char *frame, unsigned frameSize);
+	virtual std::list<std::pair<uint8_t const *, size_t>> splitFrames(uint8_t const *frame, size_t frameSize);
 
 	// overide FramedSource
 	virtual void doGetNextFrame();
@@ -119,5 +119,5 @@ protected:
 	std::mutex m_mutex;
 	std::string m_auxLine;
 	std::mutex m_lastFrameMutex;
-	std::string m_lastFrame;
+	std::basic_string<uint8_t> m_lastFrame;
 };

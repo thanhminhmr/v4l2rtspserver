@@ -26,13 +26,9 @@ public:
 	) {
 		FramedSource *source = nullptr;
 		if (format == V4L2_PIX_FMT_H264) {
-			source = H264_V4L2DeviceSource::createNew(
-					*env, devCapture, outfd, queueSize, captureMode, repeatConfig, false
-			);
+			source = new H264_V4L2DeviceSource(*env, devCapture, outfd, queueSize, captureMode, repeatConfig);
 		} else if (format == V4L2_PIX_FMT_HEVC) {
-			source = H265_V4L2DeviceSource::createNew(
-					*env, devCapture, outfd, queueSize, captureMode, repeatConfig, false
-			);
+			source = new H265_V4L2DeviceSource(*env, devCapture, outfd, queueSize, captureMode, repeatConfig);
 		} else {
 			source = V4L2DeviceSource::createNew(*env, devCapture, outfd, queueSize, captureMode);
 		}
@@ -45,7 +41,7 @@ public:
 			bool repeatConfig = true
 	) {
 		StreamReplicator *replicator = nullptr;
-		FramedSource *framedSource = DeviceSourceFactory::createFramedSource(
+		FramedSource *framedSource = createFramedSource(
 				env, format, devCapture, queueSize, captureMode, outfd, repeatConfig
 		);
 		if (framedSource != nullptr) {

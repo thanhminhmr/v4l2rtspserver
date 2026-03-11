@@ -23,39 +23,39 @@
 // ---------------------------------
 
 // split packet in frames
-std::list<std::pair<unsigned char *, size_t>>
-H264_V4L2DeviceSource::splitFrames(unsigned char *frame, unsigned frameSize) {
-	std::list<std::pair<unsigned char *, size_t>> frameList;
+std::list<std::pair<uint8_t const *, size_t>>
+H264_V4L2DeviceSource::splitFrames(uint8_t const *frame, const size_t frameSize) {
+	std::list<std::pair<uint8_t const *, size_t>> frameList;
 
 	size_t bufSize = frameSize;
 	size_t size = 0;
-	int frameType = 0;
-	unsigned char *buffer = this->extractFrame(frame, bufSize, size, frameType);
+	uint8_t frameType = 0;
+	uint8_t const *buffer = extractFrame(frame, bufSize, size, frameType);
 	while (buffer != nullptr) {
 		switch (frameType & 0x1F) {
 		case 7:
 			LOG(INFO) << "SPS size:" << size << " bufSize:" << bufSize;
-			m_sps.assign((char *)buffer, size);
+			m_sps.assign(buffer, size);
 			m_pps.clear();
 			break;
 		case 8:
 			LOG(INFO) << "PPS size:" << size << " bufSize:" << bufSize;
-			m_pps.assign((char *)buffer, size);
+			m_pps.assign(buffer, size);
 			break;
 		case 5:
 			LOG(INFO) << "IDR size:" << size << " bufSize:" << bufSize;
 			if (m_repeatConfig && !m_sps.empty() && !m_pps.empty()) {
-				frameList.push_back(std::pair<unsigned char *, size_t>((unsigned char *)m_sps.c_str(), m_sps.size()));
-				frameList.push_back(std::pair<unsigned char *, size_t>((unsigned char *)m_pps.c_str(), m_pps.size()));
+				frameList.emplace_back(m_sps.data(), m_sps.size());
+				frameList.emplace_back(m_pps.data(), m_pps.size());
 			}
 			if (!m_sps.empty() && !m_pps.empty()) {
-				std::lock_guard<std::mutex> lock(m_lastFrameMutex);
-				m_lastFrame.assign(H264marker, sizeof(H264marker));
-				m_lastFrame.append(m_sps.c_str(), m_sps.size());
-				m_lastFrame.append(H264marker, sizeof(H264marker));
-				m_lastFrame.append(m_pps.c_str(), m_pps.size());
-				m_lastFrame.append(H264marker, sizeof(H264marker));
-				m_lastFrame.append((char *)buffer, size);
+				std::lock_guard lock(m_lastFrameMutex);
+				m_lastFrame.assign(H26X_MARKER, sizeof(H26X_MARKER));
+				m_lastFrame.append(m_sps.data(), m_sps.size());
+				m_lastFrame.append(H26X_MARKER, sizeof(H26X_MARKER));
+				m_lastFrame.append(m_pps.data(), m_pps.size());
+				m_lastFrame.append(H26X_MARKER, sizeof(H26X_MARKER));
+				m_lastFrame.append(buffer, size);
 			}
 			break;
 		default:
@@ -65,11 +65,10 @@ H264_V4L2DeviceSource::splitFrames(unsigned char *frame, unsigned frameSize) {
 		if (!m_sps.empty() && !m_pps.empty()) {
 			u_int32_t profile_level_id = 0;
 			if (m_sps.size() >= 4)
-				profile_level_id = (((unsigned char)m_sps[1]) << 16) | (((unsigned char)m_sps[2]) << 8) |
-								   ((unsigned char)m_sps[3]);
+				profile_level_id = m_sps[1] << 16 | m_sps[2] << 8 | m_sps[3];
 
-			char *sps_base64 = base64Encode(m_sps.c_str(), m_sps.size());
-			char *pps_base64 = base64Encode(m_pps.c_str(), m_pps.size());
+			char const *const sps_base64 = base64Encode(reinterpret_cast<char const *>(m_sps.data()), m_sps.size());
+			char const *const pps_base64 = base64Encode(reinterpret_cast<char const *>(m_pps.data()), m_pps.size());
 
 			std::ostringstream os;
 			os << "profile-level-id=" << std::hex << std::setw(6) << std::setfill('0') << profile_level_id;
@@ -79,25 +78,20 @@ H264_V4L2DeviceSource::splitFrames(unsigned char *frame, unsigned frameSize) {
 			delete[] sps_base64;
 			delete[] pps_base64;
 		}
-		frameList.push_back(std::pair<unsigned char *, size_t>(buffer, size));
+		frameList.emplace_back(buffer, size);
 
-		buffer = this->extractFrame(&buffer[size], bufSize, size, frameType);
+		buffer = extractFrame(&buffer[size], bufSize, size, frameType);
 	}
 	return frameList;
 }
 
-std::list<std::string> H264_V4L2DeviceSource::getInitFrames() {
-	std::list<std::string> frameList;
-	frameList.push_back(this->getFrameWithMarker(m_sps));
-	frameList.push_back(this->getFrameWithMarker(m_pps));
+std::list<std::basic_string<uint8_t>> H264_V4L2DeviceSource::getInitFrames() {
+	std::list<std::basic_string<uint8_t>> frameList;
+	frameList.push_back(getFrameWithMarker(m_sps));
+	frameList.push_back(getFrameWithMarker(m_pps));
 	return frameList;
 }
 
-bool H264_V4L2DeviceSource::isKeyFrame(const char *buffer, int size) {
-	bool res = false;
-	if (size > 4) {
-		int frameType = buffer[4] & 0x1F;
-		res = (frameType == 5);
-	}
-	return res;
+bool H264_V4L2DeviceSource::isKeyFrame(const char *const buffer, const int size) {
+	return size > 4 && (buffer[4] & 0x1F) == 5;
 }

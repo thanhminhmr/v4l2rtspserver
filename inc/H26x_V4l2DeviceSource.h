@@ -17,26 +17,26 @@
 // ---------------------------------
 // H264 V4L2 FramedSource
 // ---------------------------------
-const char H264marker[] = {0, 0, 0, 1};
-const char H264shortmarker[] = {0, 0, 1};
+constexpr uint8_t H26X_MARKER[] = {0, 0, 0, 1};
+constexpr uint8_t H26X_SHORT_MARKER[] = {0, 0, 1};
 
 class H26X_V4L2DeviceSource : public V4L2DeviceSource {
 protected:
 	H26X_V4L2DeviceSource(
-			UsageEnvironment &env, DeviceInterface *device, int outputFd, unsigned int queueSize,
-			CaptureMode captureMode, bool repeatConfig, bool keepMarker
+			UsageEnvironment &env, DeviceInterface *device, const int outputFd, const size_t queueSize,
+			const CaptureMode captureMode, const bool repeatConfig
 	)
-		: V4L2DeviceSource(env, device, outputFd, queueSize, captureMode), m_repeatConfig(repeatConfig),
-		  m_keepMarker(keepMarker) {}
+		: V4L2DeviceSource(env, device, outputFd, queueSize, captureMode), m_repeatConfig(repeatConfig) {}
 
-	virtual ~H26X_V4L2DeviceSource() {}
+	~H26X_V4L2DeviceSource() override = default;
 
-	unsigned char *extractFrame(unsigned char *frame, size_t &size, size_t &outsize, int &frameType);
-	std::string getFrameWithMarker(const std::string &frame);
+	static uint8_t const *extractFrame(uint8_t const *frame, size_t &size, size_t &outputSize, uint8_t &frameType);
+	static std::basic_string<uint8_t> getFrameWithMarker(const std::basic_string<uint8_t> &frame);
 
-protected:
-	std::string m_sps;
-	std::string m_pps;
+
+	// ----- Fields -----
+
+	std::basic_string<uint8_t> m_sps;
+	std::basic_string<uint8_t> m_pps;
 	bool m_repeatConfig;
-	bool m_keepMarker;
 };

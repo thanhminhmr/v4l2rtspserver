@@ -9,68 +9,55 @@
 **
 ** -------------------------------------------------------------------------*/
 
+#include <algorithm>
 #include <sstream>
-
-// live555
-#include <Base64.hh>
 
 // project
 #include "H26x_V4l2DeviceSource.h"
 #include "logger.h"
 
-// extract a frame
-unsigned char *
-H26X_V4L2DeviceSource::extractFrame(unsigned char *frame, size_t &size, size_t &outsize, int &frameType) {
-	unsigned char *outFrame = nullptr;
-	outsize = 0;
-	unsigned int markerlength = 0;
+// extract a frame in Annex B bitstream
+uint8_t const *
+H26X_V4L2DeviceSource::extractFrame(uint8_t const *frame, size_t &size, size_t &outputSize, uint8_t &frameType) {
+	outputSize = 0;
 	frameType = 0;
 
-	unsigned char *startFrame = (unsigned char *)memmem(frame, size, H264marker, sizeof(H264marker));
-	if (startFrame != nullptr) {
-		markerlength = sizeof(H264marker);
-	} else {
-		startFrame = (unsigned char *)memmem(frame, size, H264shortmarker, sizeof(H264shortmarker));
-		if (startFrame != nullptr) {
-			markerlength = sizeof(H264shortmarker);
-		}
-	}
-	if (startFrame != nullptr) {
-		frameType = startFrame[markerlength];
+	// short circuit
+	if (size < sizeof(H26X_SHORT_MARKER))
+		return nullptr;
 
-		int remainingSize = size - (startFrame - frame + markerlength);
-		unsigned char *endFrame =
-				(unsigned char *)memmem(&startFrame[markerlength], remainingSize, H264marker, sizeof(H264marker));
-		if (endFrame == nullptr) {
-			endFrame = (unsigned char *)memmem(
-					&startFrame[markerlength], remainingSize, H264shortmarker, sizeof(H264shortmarker)
-			);
-		}
+	// end of input frame data
+	uint8_t const *const frameLimit = frame + size;
 
-		if (m_keepMarker) {
-			size -= startFrame - frame;
-			outFrame = startFrame;
-		} else {
-			size -= startFrame - frame + markerlength;
-			outFrame = &startFrame[markerlength];
-		}
-
-		if (endFrame != nullptr) {
-			outsize = endFrame - outFrame;
-		} else {
-			outsize = size;
-		}
-		size -= outsize;
-	} else if (size >= sizeof(H264shortmarker)) {
+	// find the marker. Note that anything that could match a long marker will match the short marker
+	uint8_t const *const startFrame =
+			std::search(frame, frameLimit, H26X_SHORT_MARKER, H26X_SHORT_MARKER + sizeof(H26X_SHORT_MARKER));
+	if (startFrame == frameLimit) {
 		LOG(INFO) << "No marker found";
+		return nullptr;
 	}
+
+	// set the frame type
+	uint8_t const * const outFrame = &startFrame[sizeof(H26X_SHORT_MARKER)];
+	frameType = outFrame[0];
+
+	// find the next marker. Might not find it
+	uint8_t const *const endFrame =
+			std::search(outFrame, frameLimit, H26X_SHORT_MARKER, H26X_SHORT_MARKER + sizeof(H26X_SHORT_MARKER));
+
+	if (endFrame != frameLimit) {
+		outputSize = endFrame - outFrame;
+	} else {
+		outputSize = size;
+	}
+	size -= outputSize;
 
 	return outFrame;
 }
 
-std::string H26X_V4L2DeviceSource::getFrameWithMarker(const std::string &frame) {
-	std::string frameWithMarker;
-	frameWithMarker.append(H264marker, sizeof(H264marker));
+std::basic_string<uint8_t> H26X_V4L2DeviceSource::getFrameWithMarker(const std::basic_string<uint8_t> &frame) {
+	std::basic_string<uint8_t> frameWithMarker;
+	frameWithMarker.append(H26X_MARKER, sizeof(H26X_MARKER));
 	frameWithMarker.append(frame);
 	return frameWithMarker;
 }

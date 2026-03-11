@@ -42,8 +42,8 @@ void HTTPServer::HTTPClientConnection::sendHeader(const char *contentType, unsig
 	fResponseBuffer[0] = '\0'; // We've already sent the response.  This tells the calling code not to send it again.
 }
 
-void HTTPServer::HTTPClientConnection::streamSource(const std::string &content) {
-	u_int8_t *buffer = new u_int8_t[content.size()];
+void HTTPServer::HTTPClientConnection::streamSource(const std::basic_string<uint8_t> &content) {
+	auto *buffer = new u_int8_t[content.size()];
 	memcpy(buffer, content.c_str(), content.size());
 	this->streamSource(ByteStreamMemoryBufferSource::createNew(envir(), buffer, content.size()));
 }
@@ -263,7 +263,7 @@ void HTTPServer::HTTPClientConnection::handleHTTPCmd_StreamingGET(char const *ur
 			if (pos != std::string::npos) {
 				format.replace(pos, 5, "image");
 			}
-			std::string content = baseSubsession->getLastFrame();
+			std::basic_string<uint8_t> content = baseSubsession->getLastFrame();
 			this->sendHeader(format.c_str(), content.size());
 			this->streamSource(content);
 		} else {
