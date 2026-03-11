@@ -37,7 +37,7 @@
 class BaseServerMediaSubsession {
 public:
 	BaseServerMediaSubsession(StreamReplicator *replicator) : m_replicator(replicator) {
-		V4L2DeviceSource *deviceSource = dynamic_cast<V4L2DeviceSource *>(replicator->inputSource());
+		auto *deviceSource = dynamic_cast<V4L2DeviceSource *>(replicator->inputSource());
 		if (deviceSource) {
 			DeviceInterface *device = deviceSource->getDevice();
 			if (device->getVideoFormat() >= 0) {
@@ -55,53 +55,30 @@ public:
 	//    convert V4L2 pix format to RTP mime
 	// -----------------------------------------
 	static std::string getVideoRtpFormat(int format) {
-		std::string rtpFormat;
 		switch (format) {
 		case V4L2_PIX_FMT_HEVC:
-			rtpFormat = "video/H265";
-			break;
+			return "video/H265";
 		case V4L2_PIX_FMT_H264:
-			rtpFormat = "video/H264";
-			break;
+			return "video/H264";
 		case V4L2_PIX_FMT_MJPEG:
-			rtpFormat = "video/JPEG";
-			break;
 		case V4L2_PIX_FMT_JPEG:
-			rtpFormat = "video/JPEG";
-			break;
+			return "video/JPEG";
 		case V4L2_PIX_FMT_VP8:
-			rtpFormat = "video/VP8";
-			break;
+			return "video/VP8";
 		case V4L2_PIX_FMT_VP9:
-			rtpFormat = "video/VP9";
-			break;
+			return "video/VP9";
 		case V4L2_PIX_FMT_YUV444:
-			rtpFormat = "video/RAW";
-			break;
 		case V4L2_PIX_FMT_UYVY:
-			rtpFormat = "video/RAW";
-			break;
 		case V4L2_PIX_FMT_NV12:
-			rtpFormat = "video/RAW";
-			break;
 		case V4L2_PIX_FMT_Y41P:
-			rtpFormat = "video/RAW";
-			break;
 		case V4L2_PIX_FMT_BGR24:
-			rtpFormat = "video/RAW";
-			break;
 		case V4L2_PIX_FMT_BGR32:
-			rtpFormat = "video/RAW";
-			break;
 		case V4L2_PIX_FMT_RGB24:
-			rtpFormat = "video/RAW";
-			break;
 		case V4L2_PIX_FMT_RGB32:
-			rtpFormat = "video/RAW";
-			break;
+			return "video/RAW";
+		default:
+			return {};
 		}
-
-		return rtpFormat;
 	}
 
 	static std::string getAudioRtpFormat(int format, int sampleRate, int channels) {
@@ -146,8 +123,8 @@ public:
 	);
 	char const *getAuxLine(V4L2DeviceSource *source, RTPSink *rtpSink);
 
-	std::string getLastFrame() const {
-		V4L2DeviceSource *deviceSource = dynamic_cast<V4L2DeviceSource *>(m_replicator->inputSource());
+	[[nodiscard]] std::string getLastFrame() const {
+		auto *deviceSource = dynamic_cast<V4L2DeviceSource *>(m_replicator->inputSource());
 		if (deviceSource) {
 			return deviceSource->getLastFrame();
 		} else {
@@ -155,7 +132,7 @@ public:
 		}
 	}
 
-	std::string getFormat() const { return m_format; }
+	[[nodiscard]] std::string getFormat() const { return m_format; }
 
 protected:
 	StreamReplicator *m_replicator;

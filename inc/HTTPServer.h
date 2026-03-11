@@ -34,10 +34,10 @@ public:
 	}
 
 protected:
-	virtual ~TCPSink() { envir().taskScheduler().disableBackgroundHandling(fOutputSocketNum); }
+	~TCPSink() override { envir().taskScheduler().disableBackgroundHandling(fOutputSocketNum); }
 
 protected:
-	virtual Boolean continuePlaying() {
+	Boolean continuePlaying() override {
 		fInputSourceIsOpen = fSource != nullptr;
 		processBuffer();
 		return True;
@@ -119,8 +119,8 @@ private:
 		processBuffer();
 	}
 
-	unsigned numUnwrittenBytes() const { return fUnwrittenBytesEnd - fUnwrittenBytesStart; }
-	unsigned freeBufferSpace() const { return TCP_STREAM_SINK_BUFFER_SIZE - fUnwrittenBytesEnd; }
+	[[nodiscard]] unsigned numUnwrittenBytes() const { return fUnwrittenBytesEnd - fUnwrittenBytesStart; }
+	[[nodiscard]] unsigned freeBufferSpace() const { return TCP_STREAM_SINK_BUFFER_SIZE - fUnwrittenBytesEnd; }
 
 private:
 	unsigned char fBuffer[TCP_STREAM_SINK_BUFFER_SIZE];
