@@ -29,7 +29,7 @@ protected:
 		: V4L2DeviceSource(env, device, outputFd, queueSize, captureMode), m_repeatConfig(repeatConfig),
 		  m_keepMarker(keepMarker) {}
 
-	virtual ~H26X_V4L2DeviceSource() = default;
+	~H26X_V4L2DeviceSource() = default;
 
 	unsigned char *extractFrame(unsigned char *frame, size_t &size, size_t &outsize, int &frameType);
 	std::string getFrameWithMarker(const std::string &frame);
