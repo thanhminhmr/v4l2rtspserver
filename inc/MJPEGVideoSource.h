@@ -21,12 +21,12 @@ public:
 	static MJPEGVideoSource *createNew(UsageEnvironment &env, FramedSource *source) {
 		return new MJPEGVideoSource(env, source);
 	}
-	virtual void doGetNextFrame() {
+	void doGetNextFrame() override {
 		if (m_inputSource) {
 			m_inputSource->getNextFrame(fTo, fMaxSize, afterGettingFrameSub, this, FramedSource::handleClosure, this);
 		}
 	}
-	virtual void doStopGettingFrames() {
+	void doStopGettingFrames() override {
 		FramedSource::doStopGettingFrames();
 		if (m_inputSource) {
 			m_inputSource->stopGettingFrames();
@@ -36,7 +36,7 @@ public:
 			void *clientData, unsigned frameSize, unsigned numTruncatedBytes, struct timeval presentationTime,
 			unsigned durationInMicroseconds
 	) {
-		MJPEGVideoSource *source = (MJPEGVideoSource *)clientData;
+		auto *source = reinterpret_cast<MJPEGVideoSource *>(clientData);
 		source->afterGettingFrame(frameSize, numTruncatedBytes, presentationTime, durationInMicroseconds);
 	}
 
@@ -44,11 +44,11 @@ public:
 			unsigned frameSize, unsigned numTruncatedBytes, struct timeval presentationTime,
 			unsigned durationInMicroseconds
 	);
-	virtual u_int8_t type() { return m_restartInterval ? m_type | 0x40 : m_type; };
-	virtual u_int8_t qFactor() { return 128; };
-	virtual u_int8_t width() { return m_width; };
-	virtual u_int8_t height() { return m_height; };
-	virtual u_int16_t restartInterval() { return m_restartInterval; }
+	u_int8_t type() override { return m_restartInterval ? m_type | 0x40 : m_type; };
+	u_int8_t qFactor() override { return 128; };
+	u_int8_t width() override { return m_width; };
+	u_int8_t height() override { return m_height; };
+	u_int16_t restartInterval() override { return m_restartInterval; }
 
 	u_int8_t const *quantizationTables(u_int8_t &precision, u_int16_t &length);
 
@@ -56,7 +56,7 @@ protected:
 	MJPEGVideoSource(UsageEnvironment &env, FramedSource *source)
 		: JPEGVideoSource(env), m_inputSource(source), m_width(0), m_height(0), m_qTable{}, m_qTableSize(0),
 		  m_precision(0), m_type(0), m_restartInterval(0) {}
-	virtual ~MJPEGVideoSource() { Medium::close(m_inputSource); }
+	~MJPEGVideoSource() override { Medium::close(m_inputSource); }
 
 protected:
 	FramedSource *m_inputSource;

@@ -33,7 +33,7 @@ protected:
 		: H26X_V4L2DeviceSource(env, device, outputFd, queueSize, captureMode, repeatConfig, keepMarker) {}
 
 	// overide V4L2DeviceSource
-	virtual std::list<std::pair<std::uint8_t *, size_t>> splitFrames(std::uint8_t *frame, unsigned frameSize);
-	virtual std::list<std::string> getInitFrames();
-	virtual bool isKeyFrame(const char *, int);
+	std::list<std::pair<std::uint8_t *, size_t>> splitFrames(std::uint8_t *frame, unsigned frameSize) override;
+	std::list<std::string> getInitFrames() override;
+	bool isKeyFrame(const char *, int) override;
 };

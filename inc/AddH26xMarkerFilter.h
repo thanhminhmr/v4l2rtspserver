@@ -16,18 +16,19 @@
 
 class AddH26xMarkerFilter : public FramedFilter {
 public:
-	AddH26xMarkerFilter(UsageEnvironment &env, FramedSource *inputSource) : FramedFilter(env, inputSource) {
-		m_buffer.resize(OutPacketBuffer::maxSize);
+	AddH26xMarkerFilter(UsageEnvironment &env, FramedSource *inputSource)
+		: FramedFilter(env, inputSource), m_bufferSize(OutPacketBuffer::maxSize) {
+		m_buffer.resize(m_bufferSize);
 	}
 
-	virtual ~AddH26xMarkerFilter() {}
+	~AddH26xMarkerFilter() = default;
 
 private:
 	static void afterGettingFrame(
 			void *clientData, unsigned frameSize, unsigned numTruncatedBytes, struct timeval presentationTime,
 			unsigned durationInMicroseconds
 	) {
-		AddH26xMarkerFilter *sink = reinterpret_cast<AddH26xMarkerFilter *>(clientData);
+		auto *sink = reinterpret_cast<AddH26xMarkerFilter *>(clientData);
 		sink->afterGettingFrame(frameSize, numTruncatedBytes, presentationTime);
 	}
 
@@ -57,7 +58,7 @@ private:
 		afterGetting(this);
 	}
 
-	virtual void doGetNextFrame() {
+	void doGetNextFrame() override {
 		if (fInputSource != nullptr) {
 			fInputSource->getNextFrame(m_buffer.data(), m_bufferSize, afterGettingFrame, this, handleClosure, this);
 		}
