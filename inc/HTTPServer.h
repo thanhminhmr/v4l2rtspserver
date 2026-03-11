@@ -83,10 +83,11 @@ private:
 		}
 	}
 
-	static void socketWritableHandler(void *clientData, int mask) { ((TCPSink *)clientData)->socketWritableHandler(); }
+	static void socketWritableHandler(void *clientData, int mask) {
+		reinterpret_cast<TCPSink *>(clientData)->socketWritableHandler();
+	}
 	void socketWritableHandler() {
-		envir().taskScheduler().disableBackgroundHandling(
-				fOutputSocketNum
+		envir().taskScheduler().disableBackgroundHandling(fOutputSocketNum
 		); // disable this handler until the next time it's needed
 		fOutputSocketIsWritable = True;
 		processBuffer();
@@ -96,7 +97,7 @@ private:
 			void *clientData, unsigned frameSize, unsigned numTruncatedBytes, struct timeval presentationTime,
 			unsigned durationInMicroseconds
 	) {
-		((TCPSink *)clientData)->afterGettingFrame(frameSize, numTruncatedBytes);
+		reinterpret_cast<TCPSink *>(clientData)->afterGettingFrame(frameSize, numTruncatedBytes);
 	}
 
 	void afterGettingFrame(unsigned frameSize, unsigned numTruncatedBytes) {
@@ -110,7 +111,7 @@ private:
 		processBuffer();
 	}
 
-	static void ourOnSourceClosure(void *clientData) { ((TCPSink *)clientData)->ourOnSourceClosure(); }
+	static void ourOnSourceClosure(void *clientData) { reinterpret_cast<TCPSink *>(clientData)->ourOnSourceClosure(); }
 
 	void ourOnSourceClosure() {
 		// The input source has closed:
@@ -192,7 +193,7 @@ class HTTPServer : public RTSPServer {
 			HashTable::Iterator *iter(HashTable::Iterator::create(*fTable));
 			char const *key;
 			char *user;
-			while ((user = (char *)iter->next(key)) != nullptr) {
+			while ((user = reinterpret_cast<char *>(iter->next(key))) != nullptr) {
 				users.push_back(user);
 			}
 			return users;
@@ -339,8 +340,8 @@ public:
 
 	std::list<std::string> getUsers() {
 		std::list<std::string> users;
-		MyUserAuthenticationDatabase *auth =
-				(MyUserAuthenticationDatabase *)this->getAuthenticationDatabaseForCommand(nullptr);
+		auto *auth =
+				reinterpret_cast<MyUserAuthenticationDatabase *>(this->getAuthenticationDatabaseForCommand(nullptr));
 		if (auth != nullptr) {
 			users = auth->getUsers();
 		}

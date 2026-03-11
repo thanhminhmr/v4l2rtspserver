@@ -9,6 +9,7 @@
 
 #pragma once
 #include <list>
+#include <vector>
 
 // ---------------------------------
 // Device Interface
@@ -21,10 +22,10 @@ public:
 	virtual int getWidth() { return -1; }
 	virtual int getHeight() { return -1; }
 	virtual int getVideoFormat() { return -1; }
-	virtual std::list<int> getVideoFormatList() { return std::list<int>(); }
+	virtual std::list<int> getVideoFormatList() { return {}; }
 	virtual int getSampleRate() { return -1; }
 	virtual int getChannels() { return -1; }
 	virtual int getAudioFormat() { return -1; }
-	virtual std::list<int> getAudioFormatList() { return std::list<int>(); }
-	virtual ~DeviceInterface() {};
+	virtual std::list<int> getAudioFormatList() { return {}; }
+	virtual ~DeviceInterface() = default;
 };
