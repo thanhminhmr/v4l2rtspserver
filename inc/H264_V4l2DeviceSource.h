@@ -11,6 +11,8 @@
 
 #pragma once
 
+#include <cstdint>
+
 // project
 #include "H26x_V4l2DeviceSource.h"
 
@@ -31,7 +33,7 @@ protected:
 		: H26X_V4L2DeviceSource(env, device, outputFd, queueSize, captureMode, repeatConfig, keepMarker) {}
 
 	// overide V4L2DeviceSource
-	virtual std::list<std::pair<unsigned char *, size_t>> splitFrames(unsigned char *frame, unsigned frameSize);
+	virtual std::list<std::pair<std::uint8_t *, size_t>> splitFrames(std::uint8_t *frame, unsigned frameSize);
 	virtual std::list<std::string> getInitFrames();
 	virtual bool isKeyFrame(const char *, int);
 };
