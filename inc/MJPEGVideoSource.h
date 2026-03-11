@@ -54,10 +54,8 @@ public:
 
 protected:
 	MJPEGVideoSource(UsageEnvironment &env, FramedSource *source)
-		: JPEGVideoSource(env), m_inputSource(source), m_width(0), m_height(0), m_qTableSize(0), m_precision(0),
-		  m_type(0), m_restartInterval(0) {
-		memset(&m_qTable, 0, sizeof(m_qTable));
-	}
+		: JPEGVideoSource(env), m_inputSource(source), m_width(0), m_height(0), m_qTable{}, m_qTableSize(0),
+		  m_precision(0), m_type(0), m_restartInterval(0) {}
 	virtual ~MJPEGVideoSource() { Medium::close(m_inputSource); }
 
 protected:

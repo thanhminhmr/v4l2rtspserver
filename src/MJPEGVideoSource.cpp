@@ -12,6 +12,7 @@
 ** -------------------------------------------------------------------------*/
 
 #include "MJPEGVideoSource.h"
+#include <algorithm>
 
 void MJPEGVideoSource::afterGettingFrame(
 		unsigned frameSize, unsigned numTruncatedBytes, struct timeval presentationTime, unsigned durationInMicroseconds
@@ -57,7 +58,7 @@ void MJPEGVideoSource::afterGettingFrame(
 				unsigned int quantSize = 64 * (precision + 1);
 				if (quantSize * quantIdx + quantSize <= sizeof(m_qTable)) {
 					if ((qtable_position + quantSize) < frameSize) {
-						memcpy(m_qTable + quantSize * quantIdx, fTo + qtable_position + 1, quantSize);
+						std::copy_n(fTo + qtable_position + 1, quantSize, m_qTable + quantSize * quantIdx);
 						LOG(DEBUG) << "Quantization table idx:" << quantIdx << " precision:" << precision
 								   << " size:" << quantSize << " total size:" << m_qTableSize;
 						if (quantSize * quantIdx + quantSize > m_qTableSize) {
@@ -91,7 +92,7 @@ void MJPEGVideoSource::afterGettingFrame(
 	if (headerSize != 0) {
 		LOG(DEBUG) << "headerSize:" << headerSize;
 		fFrameSize = frameSize - headerSize;
-		memmove(fTo, fTo + headerSize, fFrameSize);
+		std::copy(fTo + headerSize, fTo + frameSize, fTo);
 	} else {
 		LOG(NOTICE) << "Bad header => dropping frame";
 		fFrameSize = 0;

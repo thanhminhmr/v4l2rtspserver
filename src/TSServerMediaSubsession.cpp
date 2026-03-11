@@ -9,6 +9,9 @@
 
 #include "TSServerMediaSubsession.h"
 #include "AddH26xMarkerFilter.h"
+#include <algorithm>
+#include <cstdint>
+#include <memory>
 
 TSServerMediaSubsession::TSServerMediaSubsession(
 		UsageEnvironment &env, StreamReplicator *videoreplicator, StreamReplicator *audioreplicator,
@@ -64,9 +67,9 @@ FramedSource *TSServerMediaSubsession::getStreamSource(void *streamToken) {
 	std::string buffer = m_hlsSink->getBuffer(m_slice);
 	unsigned int size = buffer.size();
 	if (size != 0) {
-		u_int8_t *content = new u_int8_t[size];
-		memcpy(content, buffer.c_str(), size);
-		source = ByteStreamMemoryBufferSource::createNew(envir(), content, size);
+		auto content = std::make_unique<std::uint8_t[]>(size);
+		std::copy(buffer.begin(), buffer.end(), content.get());
+		source = ByteStreamMemoryBufferSource::createNew(envir(), content.release(), size);
 	}
 	return source;
 }

@@ -1,10 +1,12 @@
 # cmake
+.cache
 CMakeFiles/
 CMakeCache.txt
 *.cmake
 cmake-build-debug/
 cmake-build-release/
 Makefile
+compile_commands.json
 # build
 *.a
 *.service

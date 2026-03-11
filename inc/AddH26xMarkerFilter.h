@@ -9,21 +9,25 @@
 
 #pragma once
 
+#include <algorithm>
+#include <cstdint>
+#include <memory>
+#include <vector>
+
 class AddH26xMarkerFilter : public FramedFilter {
 public:
 	AddH26xMarkerFilter(UsageEnvironment &env, FramedSource *inputSource) : FramedFilter(env, inputSource) {
-		m_bufferSize = OutPacketBuffer::maxSize;
-		m_buffer = new unsigned char[m_bufferSize];
+		m_buffer.resize(OutPacketBuffer::maxSize);
 	}
 
-	virtual ~AddH26xMarkerFilter() { delete[] m_buffer; }
+	virtual ~AddH26xMarkerFilter() {}
 
 private:
 	static void afterGettingFrame(
 			void *clientData, unsigned frameSize, unsigned numTruncatedBytes, struct timeval presentationTime,
 			unsigned durationInMicroseconds
 	) {
-		AddH26xMarkerFilter *sink = (AddH26xMarkerFilter *)clientData;
+		AddH26xMarkerFilter *sink = reinterpret_cast<AddH26xMarkerFilter *>(clientData);
 		sink->afterGettingFrame(frameSize, numTruncatedBytes, presentationTime);
 	}
 
@@ -35,8 +39,7 @@ private:
 					   "size truncated:"
 					<< numTruncatedBytes << " bufferSize:" << m_bufferSize << "\n";
 			m_bufferSize += numTruncatedBytes;
-			delete[] m_buffer;
-			m_buffer = new unsigned char[m_bufferSize];
+			m_buffer.resize(m_bufferSize);
 			fFrameSize = 0;
 		} else {
 			char marker[] = {0, 0, 0, 1};
@@ -47,8 +50,8 @@ private:
 						<< " bufferSize:" << fFrameSize << "\n";
 			} else {
 				fNumTruncatedBytes = 0;
-				memcpy(fTo, marker, sizeof(marker));
-				memcpy(fTo + sizeof(marker), m_buffer, frameSize);
+				std::copy_n(marker, sizeof(marker), fTo);
+				std::copy_n(m_buffer.data(), frameSize, fTo + sizeof(marker));
 			}
 		}
 		afterGetting(this);
@@ -56,10 +59,10 @@ private:
 
 	virtual void doGetNextFrame() {
 		if (fInputSource != nullptr) {
-			fInputSource->getNextFrame(m_buffer, m_bufferSize, afterGettingFrame, this, handleClosure, this);
+			fInputSource->getNextFrame(m_buffer.data(), m_bufferSize, afterGettingFrame, this, handleClosure, this);
 		}
 	}
 
-	unsigned char *m_buffer;
+	std::vector<std::uint8_t> m_buffer;
 	unsigned int m_bufferSize;
 };
