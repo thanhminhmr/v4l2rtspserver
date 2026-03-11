@@ -8,6 +8,8 @@
 ** -------------------------------------------------------------------------*/
 
 #include "MemoryBufferSink.h"
+#include <cstdint>
+#include <vector>
 
 // -----------------------------------------
 //    MemoryBufferSink
@@ -16,15 +18,15 @@ MemoryBufferSink::MemoryBufferSink(
 		UsageEnvironment &env, unsigned bufferSize, unsigned int sliceDuration, unsigned int nbSlices
 )
 	: MediaSink(env), m_bufferSize(bufferSize), m_refTime(0), m_sliceDuration(sliceDuration), m_nbSlices(nbSlices) {
-	m_buffer = new unsigned char[m_bufferSize];
+	m_buffer.resize(m_bufferSize);
 }
 
-MemoryBufferSink::~MemoryBufferSink() { delete[] m_buffer; }
+MemoryBufferSink::~MemoryBufferSink() {}
 
 Boolean MemoryBufferSink::continuePlaying() {
 	Boolean ret = False;
 	if (fSource != nullptr) {
-		fSource->getNextFrame(m_buffer, m_bufferSize, afterGettingFrame, this, onSourceClosure, this);
+		fSource->getNextFrame(m_buffer.data(), m_bufferSize, afterGettingFrame, this, onSourceClosure, this);
 		ret = True;
 	}
 	return ret;
@@ -37,8 +39,7 @@ void MemoryBufferSink::afterGettingFrame(
 		envir() << "FileSink::afterGettingFrame(): The input frame data was too large for our buffer size \n";
 		// realloc a bigger buffer
 		m_bufferSize += numTruncatedBytes;
-		delete[] m_buffer;
-		m_buffer = new unsigned char[m_bufferSize];
+		m_buffer.resize(m_bufferSize);
 	} else {
 		// append buffer to slice buffer
 		if (m_refTime == 0) {
@@ -46,7 +47,7 @@ void MemoryBufferSink::afterGettingFrame(
 		}
 		unsigned int slice = (presentationTime.tv_sec - m_refTime) / m_sliceDuration;
 		std::string &outputBuffer = m_outputBuffers[slice];
-		outputBuffer.append((const char *)m_buffer, frameSize);
+		outputBuffer.append(reinterpret_cast<const char *>(m_buffer.data()), frameSize);
 
 		// remove old buffers
 		while (m_outputBuffers.size() > m_nbSlices) {

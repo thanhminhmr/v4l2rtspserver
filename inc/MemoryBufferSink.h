@@ -11,8 +11,10 @@
 
 #pragma once
 
+#include <cstdint>
 #include <map>
 #include <string>
+#include <vector>
 
 #include "MediaSink.hh"
 
@@ -33,7 +35,7 @@ protected:
 			void *clientData, unsigned frameSize, unsigned numTruncatedBytes, struct timeval presentationTime,
 			unsigned durationInMicroseconds
 	) {
-		MemoryBufferSink *sink = (MemoryBufferSink *)clientData;
+		MemoryBufferSink *sink = reinterpret_cast<MemoryBufferSink *>(clientData);
 		sink->afterGettingFrame(frameSize, numTruncatedBytes, presentationTime);
 	}
 
@@ -47,7 +49,7 @@ public:
 	unsigned int getSliceDuration() { return m_sliceDuration; }
 
 private:
-	unsigned char *m_buffer;
+	std::vector<std::uint8_t> m_buffer;
 	unsigned int m_bufferSize;
 	std::map<unsigned int, std::string> m_outputBuffers;
 	unsigned int m_refTime;
