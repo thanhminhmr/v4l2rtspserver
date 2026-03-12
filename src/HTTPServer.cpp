@@ -332,7 +332,16 @@ void HTTPServer::HTTPClientConnection::handleHTTPCmd_StreamingGET(char const *ur
 		}
 	} else {
 		unsigned offsetInSeconds;
-		if (sscanf(questionMarkPos, "?segment=%u", &offsetInSeconds) != 1) {
+		std::string segmentStr(questionMarkPos);
+		std::string prefix = "?segment=";
+		if (segmentStr.size() <= prefix.size() || segmentStr.compare(0, prefix.size(), prefix) != 0 ||
+			segmentStr.size() == prefix.size()) {
+			handleHTTPCmd_notSupported();
+			return;
+		}
+		try {
+			offsetInSeconds = std::stoul(segmentStr.substr(prefix.size()));
+		} catch (...) {
 			handleHTTPCmd_notSupported();
 			return;
 		}
