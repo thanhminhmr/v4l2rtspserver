@@ -21,7 +21,7 @@ MemoryBufferSink::MemoryBufferSink(
 	m_buffer.resize(m_bufferSize);
 }
 
-MemoryBufferSink::~MemoryBufferSink() {}
+MemoryBufferSink::~MemoryBufferSink() = default;
 
 Boolean MemoryBufferSink::continuePlaying() {
 	Boolean ret = False;
@@ -60,7 +60,7 @@ void MemoryBufferSink::afterGettingFrame(
 
 unsigned int MemoryBufferSink::getBufferSize(unsigned int slice) {
 	unsigned int size = 0;
-	std::map<unsigned int, std::string>::iterator it = m_outputBuffers.find(slice);
+	auto it = m_outputBuffers.find(slice);
 	if (it != m_outputBuffers.end()) {
 		size = it->second.size();
 	}
@@ -69,7 +69,7 @@ unsigned int MemoryBufferSink::getBufferSize(unsigned int slice) {
 
 std::string MemoryBufferSink::getBuffer(unsigned int slice) {
 	std::string content;
-	std::map<unsigned int, std::string>::iterator it = m_outputBuffers.find(slice);
+	auto it = m_outputBuffers.find(slice);
 	if (it != m_outputBuffers.end()) {
 		content = it->second;
 	}
@@ -77,11 +77,11 @@ std::string MemoryBufferSink::getBuffer(unsigned int slice) {
 }
 
 unsigned int MemoryBufferSink::firstTime() {
-	unsigned int firstTime = 0;
+	unsigned int firstTimeVal = 0;
 	if (m_outputBuffers.size() != 0) {
-		firstTime = m_outputBuffers.begin()->first;
+		firstTimeVal = m_outputBuffers.begin()->first;
 	}
-	return firstTime * m_sliceDuration;
+	return firstTimeVal * m_sliceDuration;
 }
 
 unsigned int MemoryBufferSink::duration() {

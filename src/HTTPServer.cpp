@@ -19,7 +19,7 @@
 
 #include "ByteStreamMemoryBufferSource.hh"
 #include "HTTPServer.h"
-#include <time.h>
+#include <ctime>
 
 #include "BaseServerMediaSubsession.h"
 
@@ -67,7 +67,7 @@ void HTTPServer::HTTPClientConnection::streamSource(FramedSource *source) {
 }
 
 void lookupServerMediaSessionCompletionFuncCallback(void *clientData, ServerMediaSession *sessionLookedUp) {
-	ServerMediaSession **ptr = reinterpret_cast<ServerMediaSession **>(clientData);
+	auto **ptr = reinterpret_cast<ServerMediaSession **>(clientData);
 	*ptr = sessionLookedUp;
 }
 

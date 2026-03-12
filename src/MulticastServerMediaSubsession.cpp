@@ -31,11 +31,11 @@ RTPSink *MulticastServerMediaSubsession::createRtpSink(
 #if LIVEMEDIA_LIBRARY_VERSION_INT < 1607644800
 	struct in_addr groupAddress = destinationAddress;
 #else
-	struct sockaddr_storage groupAddress;
+	struct sockaddr_storage groupAddress = {};
 	groupAddress.ss_family = AF_INET;
 	((struct sockaddr_in &)groupAddress).sin_addr = destinationAddress;
 #endif
-	Groupsock *rtpGroupsock = new Groupsock(env, groupAddress, rtpPortNum, ttl);
+	auto *rtpGroupsock = new Groupsock(env, groupAddress, rtpPortNum, ttl);
 
 	// Create a RTP sink
 	m_rtpSink =

@@ -57,7 +57,7 @@ static const snd_pcm_format_t formats[] = {
 };
 
 ALSACapture *ALSACapture::createNew(const ALSACaptureParameters &params) {
-	ALSACapture *capture = new ALSACapture(params);
+	auto *capture = new ALSACapture(params);
 	if (capture) {
 		if (capture->getFd() == -1) {
 			delete capture;

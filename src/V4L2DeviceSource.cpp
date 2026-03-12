@@ -86,7 +86,7 @@ void *V4L2DeviceSource::thread() {
 	int stop = 0;
 	fd_set fdset;
 	FD_ZERO(&fdset);
-	timeval tv;
+	timeval tv = {};
 
 	LOG(NOTICE) << "begin thread";
 	while (!stop) {
@@ -124,7 +124,7 @@ void V4L2DeviceSource::deliverFrame() {
 		if (m_captureQueue.empty()) {
 			LOG(DEBUG) << "Queue is empty";
 		} else {
-			timeval curTime;
+			timeval curTime = {};
 			gettimeofday(&curTime, nullptr);
 			Frame *frame = m_captureQueue.front();
 			m_captureQueue.pop_front();
