@@ -102,7 +102,7 @@ ALSACapture::ALSACapture(const ALSACaptureParameters &params)
 		this->close();
 	} else if (this->configureFormat(hw_params) < 0) {
 		this->close();
-	} else if ((err = snd_pcm_hw_params_set_rate_near(m_pcm, hw_params, &m_params.m_sampleRate, 0)) < 0) {
+	} else if ((err = snd_pcm_hw_params_set_rate_near(m_pcm, hw_params, &m_params.m_sampleRate, nullptr)) < 0) {
 		LOG(ERROR) << "cannot set sample rate device: " << m_params.m_devName << " error:" << snd_strerror(err);
 		this->close();
 	} else if ((err = snd_pcm_hw_params_set_channels(m_pcm, hw_params, m_params.m_channels)) < 0) {
@@ -165,7 +165,7 @@ int ALSACapture::configureFormat(snd_pcm_hw_params_t *hw_params) {
 size_t ALSACapture::read(char *buffer, size_t bufferSize) {
 	size_t size = 0;
 	int fmt_phys_width_bytes = 0;
-	if (m_pcm != 0) {
+	if (m_pcm != nullptr) {
 		fmt_phys_width_bytes = snd_pcm_format_physical_width(m_fmt) / 8;
 
 		snd_pcm_sframes_t ret = snd_pcm_readi(m_pcm, buffer, m_periodSize * fmt_phys_width_bytes);
@@ -198,7 +198,7 @@ int ALSACapture::getFd() {
 	struct pollfd pfds[nbfs];
 	pfds[0].fd = -1;
 
-	if (m_pcm != 0) {
+	if (m_pcm != nullptr) {
 		int count = snd_pcm_poll_descriptors_count(m_pcm);
 		int err = snd_pcm_poll_descriptors(m_pcm, pfds, count);
 		if (err < 0) {

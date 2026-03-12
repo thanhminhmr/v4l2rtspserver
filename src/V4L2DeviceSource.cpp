@@ -245,7 +245,7 @@ void V4L2DeviceSource::queueFrame(char *frame, int frameSize, const timeval &tv,
 std::list<std::pair<std::uint8_t *, size_t>> V4L2DeviceSource::splitFrames(std::uint8_t *frame, unsigned frameSize) {
 	std::list<std::pair<std::uint8_t *, size_t>> frameList;
 	if (frame != nullptr) {
-		frameList.push_back(std::pair<std::uint8_t *, size_t>(frame, frameSize));
+		frameList.emplace_back(frame, frameSize);
 
 		std::lock_guard<std::mutex> lock(m_lastFrameMutex);
 		m_lastFrame.assign(reinterpret_cast<char *>(frame), frameSize);

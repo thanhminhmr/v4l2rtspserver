@@ -46,7 +46,7 @@ RTPSink *MulticastServerMediaSubsession::createRtpSink(
 	unsigned char CNAME[maxCNAMElen + 1];
 	gethostname((char *)CNAME, maxCNAMElen);
 	CNAME[maxCNAMElen] = '\0';
-	Groupsock *rtcpGroupsock = new Groupsock(env, groupAddress, rtcpPortNum, ttl);
+	auto *rtcpGroupsock = new Groupsock(env, groupAddress, rtcpPortNum, ttl);
 	m_rtcpInstance = RTCPInstance::createNew(env, rtcpGroupsock, 500, CNAME, m_rtpSink, nullptr);
 
 	// Start Playing the Sink
