@@ -78,7 +78,7 @@ std::string MemoryBufferSink::getBuffer(unsigned int slice) {
 
 unsigned int MemoryBufferSink::firstTime() {
 	unsigned int firstTimeVal = 0;
-	if (m_outputBuffers.size() != 0) {
+	if (!m_outputBuffers.empty()) {
 		firstTimeVal = m_outputBuffers.begin()->first;
 	}
 	return firstTimeVal * m_sliceDuration;
@@ -86,7 +86,7 @@ unsigned int MemoryBufferSink::firstTime() {
 
 unsigned int MemoryBufferSink::duration() {
 	unsigned int duration = 0;
-	if (m_outputBuffers.size() != 0) {
+	if (!m_outputBuffers.empty()) {
 		duration = m_outputBuffers.rbegin()->first - m_outputBuffers.begin()->first;
 	}
 	return (duration)*m_sliceDuration;

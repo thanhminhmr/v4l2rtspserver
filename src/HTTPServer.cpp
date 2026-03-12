@@ -307,7 +307,7 @@ void HTTPServer::HTTPClientConnection::handleHTTPCmd_StreamingGET(char const *ur
 		std::string ext;
 
 		std::string url(urlSuffix);
-		size_t pos = url.find_last_of(".");
+		size_t pos = url.rfind('.');
 		if (pos != std::string::npos) {
 			streamName.assign(url.substr(0, pos));
 			ext.assign(url.substr(pos + 1));
