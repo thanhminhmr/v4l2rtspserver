@@ -15,14 +15,14 @@ This is a C++ project that has problem with code quality: There are many C-like 
 
 ## Tools
 - Run `make` in `cmake-build-debug/` folder to verify changes compile correctly.
-- Your built-in LSP server (`clangd`) is configured with `clang-tidy` enabled, check for warning/suggestion as a list of problem to fix the code.
+- `clang-tidy` is also installed, so you can run it to check the code directly, for warning/suggestion as a list of problem to fix the code: `clang-tidy <source-file>`
 - You can look at the recent `git log` for inspiration.
 
 ## Completed Changes
 
 ### Commits Made (each change set committed separately for human review):
 1. `746c6d3` - Refactor V4L2DeviceSource and HTTPServer to modern C++
-2. `a8b3cab` - Refactor MJPEGVideoSource and AddH26xMarkerFilter to modern C++  
+2. `a8b3cab` - Refactor MJPEGVideoSource and AddH26xMarkerFilter to modern C++
 3. `a73ea61` - Refactor H264/H265 device sources to modern C++
 4. `4354297` - Refactor MemoryBufferSink to modern C++
 5. `42ef2f3` - Apply clang-tidy modernize-* suggestions
@@ -32,6 +32,12 @@ This is a C++ project that has problem with code quality: There are many C-like 
 9. `f14fa2d` - Replace C functions with C++ equivalents
 10. `7b3e691` - Replace sscanf with std::stoul in HTTPServer
 11. `cae519c` - Replace fprintf with LOG(ERROR) in ALSACapture
+12. `3775b77` - Fix clang-tidy warnings: use auto, make getFrameWithMarker static
+13. `27f75a7` - Fix clang-tidy warnings: modernize-use-auto, use-equals-default, initialize timeval
+14. `dfeb1a4` - Initialize timeval variables to fix cppcoreguidelines warnings
+15. `73b96ca` - Fix modernize-use-emplace and performance-faster-string-find warnings
+16. `111988a` - Fix readability-container-size-empty and remaining performance-faster-string-find
+17. `b3144df` - Fix more clang-tidy: modernize-use-nullptr, modernize-use-emplace
 
 ### Changes Applied:
 - Replaced `memcpy` with `std::copy` / `std::copy_n`
@@ -54,3 +60,11 @@ This is a C++ project that has problem with code quality: There are many C-like 
 - Replaced `strlen()` with `std::strlen()`
 - Replaced `sscanf()` with `std::stoul()`
 - Replaced `fprintf()` with `LOG(ERROR)`
+- Added custom `memmem` implementation using `std::search` (portable)
+- Fixed `timeval` initialization with `{}`
+- Used `emplace_back` instead of `push_back`
+- Used `std::empty()` instead of `size() != 0`
+- Used `rfind()` instead of `find_last_of(".")`
+- Replaced C-style casts with `auto` for modernity
+- Used `nullptr` instead of `0` for pointers
+- Changed `find_first_of(" ")` to `find(' ')` for single char
