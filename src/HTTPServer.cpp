@@ -13,6 +13,7 @@
 
 #include <algorithm>
 #include <cstdint>
+#include <cstring>
 #include <fstream>
 #include <sstream>
 
@@ -40,7 +41,7 @@ void HTTPServer::HTTPClientConnection::sendHeader(const char *contentType, unsig
 
 	// Send the response header
 	send(fClientOutputSocket, reinterpret_cast<const char *>(fResponseBuffer),
-		 strlen(reinterpret_cast<const char *>(fResponseBuffer)), 0);
+		 std::strlen(reinterpret_cast<const char *>(fResponseBuffer)), 0);
 	fResponseBuffer[0] = '\0'; // We've already sent the response.  This tells the calling code not to send it again.
 }
 
@@ -235,7 +236,7 @@ void HTTPServer::HTTPClientConnection::handleHTTPCmd_StreamingGET(char const *ur
 		std::string content(os.str());
 		this->sendHeader("text/plain", content.size());
 		this->streamSource(content);
-	} else if (strncmp(urlSuffix, "snapshot", strlen("snapshot")) == 0) {
+	} else if (strncmp(urlSuffix, "snapshot", 8) == 0) {
 		std::string streamName(urlSuffix);
 		size_t pos = streamName.find_last_of("?");
 		if (pos != std::string::npos) {
@@ -273,7 +274,7 @@ void HTTPServer::HTTPClientConnection::handleHTTPCmd_StreamingGET(char const *ur
 			fIsActive = False;
 			return;
 		}
-	} else if (strncmp(urlSuffix, "streamlist", strlen("streamlist")) == 0) {
+	} else if (strncmp(urlSuffix, "streamlist", 10) == 0) {
 		std::ostringstream os;
 		os << "[\n";
 		bool first = true;

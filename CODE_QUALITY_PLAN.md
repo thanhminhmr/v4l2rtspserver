@@ -1,11 +1,22 @@
 # C++ Code Quality Improvement Plan
 
+This is a C++ project that has problem with code quality: There are many C-like portion which need to convert to C++ code. Some of them are: Using malloc/free instead of new/delete, using mem* function, using int/unsigned char/etc. instead of size_t/uint8_t/etc., and many more. Your mission is to change them into proper C++ code.
+
 ## Status: IN-PROGRESS
 
 ## Scope
 - `main.cpp`
 - `src/*`
 - `inc/*`
+
+## Requirements
+- Must commit relevant changes in a single commit for human review.
+- Prefer to commit frequently with small change set.
+
+## Tools
+- Run `make` in `cmake-build-debug/` folder to verify changes compile correctly.
+- Your built-in LSP server (`clangd`) is configured with `clang-tidy` enabled, check for warning/suggestion as a list of problem to fix the code.
+- You can look at the recent `git log` for inspiration.
 
 ## Completed Changes
 
@@ -35,6 +46,3 @@
 - Added default cases to switch statements
 - Added `[[nodiscard]]` to getter functions
 - Replaced `virtual` with `override` where applicable
-
-## Build Verification
-Run `make` in `cmake-build-debug/` folder to verify changes compile correctly.

@@ -9,7 +9,8 @@
 **
 ** -------------------------------------------------------------------------*/
 
-#include <sstream>
+#include <algorithm>
+#include <cstdint>
 
 // live555
 #include <Base64.hh>
@@ -18,19 +19,33 @@
 #include "H26x_V4l2DeviceSource.h"
 #include "logger.h"
 
-// extract a frame
-unsigned char *
-H26X_V4L2DeviceSource::extractFrame(unsigned char *frame, size_t &size, size_t &outsize, int &frameType) {
-	unsigned char *outFrame = nullptr;
+namespace {
+
+template <typename T> const T *memmem(const T *haystack, size_t haystackSize, const T *needle, size_t needleSize) {
+	if (needleSize == 0 || haystackSize < needleSize) {
+		return nullptr;
+	}
+	auto it = std::search(haystack, haystack + haystackSize - needleSize + 1, needle, needle + needleSize);
+	return (it != haystack + haystackSize - needleSize + 1) ? it : nullptr;
+}
+
+} // namespace
+
+std::uint8_t *H26X_V4L2DeviceSource::extractFrame(std::uint8_t *frame, size_t &size, size_t &outsize, int &frameType) {
+	std::uint8_t *outFrame = nullptr;
 	outsize = 0;
 	unsigned int markerlength = 0;
 	frameType = 0;
 
-	unsigned char *startFrame = (unsigned char *)memmem(frame, size, H264marker, sizeof(H264marker));
+	std::uint8_t *startFrame = reinterpret_cast<std::uint8_t *>(
+			::memmem(frame, size, reinterpret_cast<const std::uint8_t *>(H264marker), sizeof(H264marker))
+	);
 	if (startFrame != nullptr) {
 		markerlength = sizeof(H264marker);
 	} else {
-		startFrame = (unsigned char *)memmem(frame, size, H264shortmarker, sizeof(H264shortmarker));
+		startFrame = reinterpret_cast<std::uint8_t *>(
+				::memmem(frame, size, reinterpret_cast<const std::uint8_t *>(H264shortmarker), sizeof(H264shortmarker))
+		);
 		if (startFrame != nullptr) {
 			markerlength = sizeof(H264shortmarker);
 		}
@@ -38,25 +53,28 @@ H26X_V4L2DeviceSource::extractFrame(unsigned char *frame, size_t &size, size_t &
 	if (startFrame != nullptr) {
 		frameType = startFrame[markerlength];
 
-		int remainingSize = size - (startFrame - frame + markerlength);
-		unsigned char *endFrame =
-				(unsigned char *)memmem(&startFrame[markerlength], remainingSize, H264marker, sizeof(H264marker));
+		size_t remainingSize = size - (startFrame - frame + markerlength);
+		std::uint8_t *endFrame = reinterpret_cast<std::uint8_t *>(::memmem(
+				&startFrame[markerlength], remainingSize, reinterpret_cast<const std::uint8_t *>(H264marker),
+				sizeof(H264marker)
+		));
 		if (endFrame == nullptr) {
-			endFrame = (unsigned char *)memmem(
-					&startFrame[markerlength], remainingSize, H264shortmarker, sizeof(H264shortmarker)
-			);
+			endFrame = reinterpret_cast<std::uint8_t *>(::memmem(
+					&startFrame[markerlength], remainingSize, reinterpret_cast<const std::uint8_t *>(H264shortmarker),
+					sizeof(H264shortmarker)
+			));
 		}
 
 		if (m_keepMarker) {
-			size -= startFrame - frame;
+			size -= static_cast<size_t>(startFrame - frame);
 			outFrame = startFrame;
 		} else {
-			size -= startFrame - frame + markerlength;
+			size -= static_cast<size_t>(startFrame - frame + markerlength);
 			outFrame = &startFrame[markerlength];
 		}
 
 		if (endFrame != nullptr) {
-			outsize = endFrame - outFrame;
+			outsize = static_cast<size_t>(endFrame - outFrame);
 		} else {
 			outsize = size;
 		}

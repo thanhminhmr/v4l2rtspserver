@@ -31,7 +31,7 @@ protected:
 
 	~H26X_V4L2DeviceSource() = default;
 
-	unsigned char *extractFrame(unsigned char *frame, size_t &size, size_t &outsize, int &frameType);
+	std::uint8_t *extractFrame(std::uint8_t *frame, size_t &size, size_t &outsize, int &frameType);
 	std::string getFrameWithMarker(const std::string &frame);
 
 protected:
