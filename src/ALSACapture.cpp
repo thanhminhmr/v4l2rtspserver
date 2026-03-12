@@ -202,7 +202,7 @@ int ALSACapture::getFd() {
 		int count = snd_pcm_poll_descriptors_count(m_pcm);
 		int err = snd_pcm_poll_descriptors(m_pcm, pfds, count);
 		if (err < 0) {
-			fprintf(stderr, "cannot snd_pcm_poll_descriptors (%s)\n", snd_strerror(err));
+			LOG(ERROR) << "cannot snd_pcm_poll_descriptors (" << snd_strerror(err) << ")";
 		}
 	}
 	return pfds[0].fd;
