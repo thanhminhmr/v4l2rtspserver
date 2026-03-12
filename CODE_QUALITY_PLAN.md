@@ -30,6 +30,8 @@ This is a C++ project that has problem with code quality: There are many C-like 
 7. `f484028` - Remove redundant virtual from defaulted destructor
 8. `c95e22d` - Fix more switch cases, add [[nodiscard]], override
 9. `f14fa2d` - Replace C functions with C++ equivalents
+10. `7b3e691` - Replace sscanf with std::stoul in HTTPServer
+11. `cae519c` - Replace fprintf with LOG(ERROR) in ALSACapture
 
 ### Changes Applied:
 - Replaced `memcpy` with `std::copy` / `std::copy_n`
@@ -50,3 +52,5 @@ This is a C++ project that has problem with code quality: There are many C-like 
 - Added custom `memmem` implementation using `std::search` (portable)
 - Replaced `atoi()` with `std::stoi()`
 - Replaced `strlen()` with `std::strlen()`
+- Replaced `sscanf()` with `std::stoul()`
+- Replaced `fprintf()` with `LOG(ERROR)`
