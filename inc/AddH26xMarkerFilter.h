@@ -14,6 +14,9 @@
 #include <memory>
 #include <vector>
 
+#include "FramedFilter.hh"
+#include "MediaSink.hh"
+
 class AddH26xMarkerFilter : public FramedFilter {
 public:
 	AddH26xMarkerFilter(UsageEnvironment &env, FramedSource *inputSource)

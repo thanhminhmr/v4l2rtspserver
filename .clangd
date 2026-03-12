@@ -2,3 +2,5 @@ Diagnostics:
   ClangTidy:
     Add: *
     FastCheckFilter: Loose
+CompileFlags:
+  Add: -ferror-limit=0
