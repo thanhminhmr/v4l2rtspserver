@@ -37,7 +37,7 @@ std::uint8_t *H26X_V4L2DeviceSource::extractFrame(std::uint8_t *frame, size_t &s
 	unsigned int markerlength = 0;
 	frameType = 0;
 
-	std::uint8_t *startFrame = reinterpret_cast<std::uint8_t *>(
+	auto *startFrame = reinterpret_cast<std::uint8_t *>(
 			::memmem(frame, size, reinterpret_cast<const std::uint8_t *>(H264marker), sizeof(H264marker))
 	);
 	if (startFrame != nullptr) {
@@ -54,7 +54,7 @@ std::uint8_t *H26X_V4L2DeviceSource::extractFrame(std::uint8_t *frame, size_t &s
 		frameType = startFrame[markerlength];
 
 		size_t remainingSize = size - (startFrame - frame + markerlength);
-		std::uint8_t *endFrame = reinterpret_cast<std::uint8_t *>(::memmem(
+		auto *endFrame = reinterpret_cast<std::uint8_t *>(::memmem(
 				&startFrame[markerlength], remainingSize, reinterpret_cast<const std::uint8_t *>(H264marker),
 				sizeof(H264marker)
 		));
@@ -87,6 +87,7 @@ std::uint8_t *H26X_V4L2DeviceSource::extractFrame(std::uint8_t *frame, size_t &s
 }
 
 std::string H26X_V4L2DeviceSource::getFrameWithMarker(const std::string &frame) {
+	(void)frame;
 	std::string frameWithMarker;
 	frameWithMarker.append(H264marker, sizeof(H264marker));
 	frameWithMarker.append(frame);

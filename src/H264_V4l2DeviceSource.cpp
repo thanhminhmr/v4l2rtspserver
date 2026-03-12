@@ -91,8 +91,8 @@ H264_V4L2DeviceSource::splitFrames(std::uint8_t *frame, unsigned frameSize) {
 
 std::list<std::string> H264_V4L2DeviceSource::getInitFrames() {
 	std::list<std::string> frameList;
-	frameList.push_back(this->getFrameWithMarker(m_sps));
-	frameList.push_back(this->getFrameWithMarker(m_pps));
+	frameList.push_back(H26X_V4L2DeviceSource::getFrameWithMarker(m_sps));
+	frameList.push_back(H26X_V4L2DeviceSource::getFrameWithMarker(m_pps));
 	return frameList;
 }
 
