@@ -167,15 +167,15 @@ bool HTTPServer::HTTPClientConnection::sendFile(char const *urlSuffix) {
 	bool ok = false;
 
 	std::string url(urlSuffix);
-	size_t pos = url.find_first_of(" ");
+	size_t pos = url.find(' ');
 	if (pos != std::string::npos) {
 		url.erase(0, pos + 1);
 	}
-	pos = url.find_first_of(" ");
+	pos = url.find(' ');
 	if (pos != std::string::npos) {
 		url.erase(pos);
 	}
-	pos = url.find_first_of("/");
+	pos = url.find('/');
 	if (pos != std::string::npos) {
 		url.erase(0, 1);
 	}
@@ -185,7 +185,7 @@ bool HTTPServer::HTTPClientConnection::sendFile(char const *urlSuffix) {
 	}
 
 	std::string ext;
-	pos = url.find_last_of(".");
+	pos = url.rfind('.');
 	if (pos != std::string::npos) {
 		ext.assign(url.substr(pos + 1));
 	}
@@ -238,7 +238,7 @@ void HTTPServer::HTTPClientConnection::handleHTTPCmd_StreamingGET(char const *ur
 		this->streamSource(content);
 	} else if (strncmp(urlSuffix, "snapshot", 8) == 0) {
 		std::string streamName(urlSuffix);
-		size_t pos = streamName.find_last_of("?");
+		size_t pos = streamName.rfind('?');
 		if (pos != std::string::npos) {
 			streamName.erase(0, pos + 1);
 		} else {

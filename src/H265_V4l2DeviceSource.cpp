@@ -49,15 +49,15 @@ H265_V4L2DeviceSource::splitFrames(std::uint8_t *frame, unsigned frameSize) {
 		case 20:
 			LOG(INFO) << "IDR size:" << size << " bufSize:" << bufSize;
 			if (m_repeatConfig && !m_vps.empty() && !m_sps.empty() && !m_pps.empty()) {
-				frameList.push_back(std::pair<std::uint8_t *, size_t>(
+				frameList.emplace_back(
 						reinterpret_cast<std::uint8_t *>(const_cast<char *>(m_vps.c_str())), m_vps.size()
-				));
-				frameList.push_back(std::pair<std::uint8_t *, size_t>(
+				);
+				frameList.emplace_back(
 						reinterpret_cast<std::uint8_t *>(const_cast<char *>(m_sps.c_str())), m_sps.size()
-				));
-				frameList.push_back(std::pair<std::uint8_t *, size_t>(
+				);
+				frameList.emplace_back(
 						reinterpret_cast<std::uint8_t *>(const_cast<char *>(m_pps.c_str())), m_pps.size()
-				));
+				);
 			}
 			if (!m_vps.empty() && !m_sps.empty() && !m_pps.empty()) {
 				std::lock_guard<std::mutex> lock(m_lastFrameMutex);
@@ -86,7 +86,7 @@ H265_V4L2DeviceSource::splitFrames(std::uint8_t *frame, unsigned frameSize) {
 			os << ";sprop-pps=" << pps_base64.get();
 			m_auxLine.assign(os.str());
 		}
-		frameList.push_back(std::pair<std::uint8_t *, size_t>(buffer, size));
+		frameList.emplace_back(buffer, size);
 
 		buffer = this->extractFrame(&buffer[size], bufSize, size, frameType);
 	}
