@@ -29,6 +29,7 @@ This is a C++ project that has problem with code quality: There are many C-like 
 6. `3b1f41a` - Fix more clang-tidy warnings
 7. `f484028` - Remove redundant virtual from defaulted destructor
 8. `c95e22d` - Fix more switch cases, add [[nodiscard]], override
+9. `f14fa2d` - Replace C functions with C++ equivalents
 
 ### Changes Applied:
 - Replaced `memcpy` with `std::copy` / `std::copy_n`
@@ -37,7 +38,7 @@ This is a C++ project that has problem with code quality: There are many C-like 
 - Replaced `new[]`/`delete[]` with `std::make_unique` / `std::vector`
 - Replaced `unsigned char*` with `std::uint8_t*`
 - Replaced C-style casts with `reinterpret_cast`
-- Added missing includes (`<cstdint>`, `<memory>`, `<algorithm>`)
+- Added missing includes (`<cstdint>`, `<memory>`, `<algorithm>`, `<cstring>`)
 - Used `clang-format` on all modified files
 - Applied clang-tidy `modernize-use-override` suggestions
 - Applied clang-tidy `modernize-use-equals-default` suggestions
@@ -46,3 +47,6 @@ This is a C++ project that has problem with code quality: There are many C-like 
 - Added default cases to switch statements
 - Added `[[nodiscard]]` to getter functions
 - Replaced `virtual` with `override` where applicable
+- Added custom `memmem` implementation using `std::search` (portable)
+- Replaced `atoi()` with `std::stoi()`
+- Replaced `strlen()` with `std::strlen()`
