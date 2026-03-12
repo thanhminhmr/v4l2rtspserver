@@ -136,7 +136,7 @@ void V4L2DeviceSource::deliverFrame() {
 			} else {
 				fFrameSize = frame->m_size;
 			}
-			timeval diff;
+			timeval diff = {};
 			timersub(&curTime, &(frame->m_timestamp), &diff);
 
 			LOG(DEBUG) << "deliverFrame\ttimestamp:" << curTime.tv_sec << "." << curTime.tv_usec
@@ -169,7 +169,7 @@ void V4L2DeviceSource::incomingPacketHandler() {
 
 // read from device
 int V4L2DeviceSource::getNextFrame() {
-	timeval ref;
+	timeval ref = {};
 	gettimeofday(&ref, nullptr);
 	auto buffer = std::make_unique<char[]>(m_device->getBufferSize());
 	int frameSize = m_device->read(buffer.get(), m_device->getBufferSize());
@@ -185,9 +185,9 @@ int V4L2DeviceSource::getNextFrame() {
 
 // post frame to queue
 void V4L2DeviceSource::postFrame(char *frame, int frameSize, const timeval &ref) {
-	timeval tv;
+	timeval tv = {};
 	gettimeofday(&tv, nullptr);
-	timeval diff;
+	timeval diff = {};
 	timersub(&tv, &ref, &diff);
 	m_in.notify(tv.tv_sec, frameSize);
 	LOG(DEBUG) << "postFrame\ttimestamp:" << ref.tv_sec << "." << ref.tv_usec << "\tsize:" << frameSize
@@ -203,9 +203,9 @@ void V4L2DeviceSource::postFrame(char *frame, int frameSize, const timeval &ref)
 }
 
 void V4L2DeviceSource::processFrame(char *frame, int frameSize, const timeval &ref) {
-	timeval tv;
+	timeval tv = {};
 	gettimeofday(&tv, nullptr);
-	timeval diff;
+	timeval diff = {};
 	timersub(&tv, &ref, &diff);
 
 	std::list<std::pair<std::uint8_t *, size_t>> frameList =
