@@ -3,6 +3,7 @@
 ## Status: IN-PROGRESS
 
 ## Scope
+
 - `main.cpp`
 - `src/*`
 - `inc/*`
@@ -10,8 +11,9 @@
 ## Completed Changes
 
 ### Commits Made (each change set committed separately for human review):
+
 1. `746c6d3` - Refactor V4L2DeviceSource and HTTPServer to modern C++
-2. `a8b3cab` - Refactor MJPEGVideoSource and AddH26xMarkerFilter to modern C++  
+2. `a8b3cab` - Refactor MJPEGVideoSource and AddH26xMarkerFilter to modern C++
 3. `a73ea61` - Refactor H264/H265 device sources to modern C++
 4. `4354297` - Refactor MemoryBufferSink to modern C++
 5. `42ef2f3` - Apply clang-tidy modernize-* suggestions
@@ -20,6 +22,7 @@
 8. `c95e22d` - Fix more switch cases, add [[nodiscard]], override
 
 ### Changes Applied:
+
 - Replaced `memcpy` with `std::copy` / `std::copy_n`
 - Replaced `memmove` with `std::copy`
 - Replaced `memset` with value initialization `{}`
@@ -37,4 +40,10 @@
 - Replaced `virtual` with `override` where applicable
 
 ## Build Verification
+
 Run `make` in `cmake-build-debug/` folder to verify changes compile correctly.
+
+## Todo list
+
+Fix warning produced by `clang-tidy -p cmake-build-debug <source-file>`. This tool runs quite slow, prefer to cache the
+output to a file.
