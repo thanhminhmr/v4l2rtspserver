@@ -1,26 +1,34 @@
 # C++ Code Quality Improvement Plan
 
-This is a C++ project that has problem with code quality: There are many C-like portion which need to convert to C++ code. Some of them are: Using malloc/free instead of new/delete, using mem* function, using int/unsigned char/etc. instead of size_t/uint8_t/etc., and many more. Your mission is to change them into proper C++ code.
+This is a C++ project that has problem with code quality: There are many C-like portion which need to convert to C++
+code. Some of them are: Using malloc/free instead of new/delete, using mem* function, using int/unsigned char/etc.
+instead of size_t/uint8_t/etc., and many more. Your mission is to change them into proper C++ code.
 
 ## Status: IN-PROGRESS
 
 ## Scope
+
 - `main.cpp`
 - `src/*`
 - `inc/*`
 
 ## Requirements
+
 - Must commit relevant changes in a single commit for human review.
 - Prefer to commit frequently with small change set.
 
 ## Tools
+
 - Run `make` in `cmake-build-debug/` folder to verify changes compile correctly.
-- `clang-tidy` is also installed, so you can run it to check the code directly, for warning/suggestion as a list of problem to fix the code: `clang-tidy <source-file>`
-- You can look at the recent `git log` for inspiration.
+- Run `clang-tidy -p cmake-build-debug <source-file>` in project root folder to produce a list of problematic lines with
+  warnings. This tool runs quite slow, prefer to cache the output to a file.
+- You can look at the recent `git log` for inspiration. You should commit and push at the same time, always. Never force
+  push though.
 
 ## Completed Changes
 
 ### Commits Made (each change set committed separately for human review):
+
 1. `746c6d3` - Refactor V4L2DeviceSource and HTTPServer to modern C++
 2. `a8b3cab` - Refactor MJPEGVideoSource and AddH26xMarkerFilter to modern C++
 3. `a73ea61` - Refactor H264/H265 device sources to modern C++
@@ -40,6 +48,7 @@ This is a C++ project that has problem with code quality: There are many C-like 
 17. `b3144df` - Fix more clang-tidy: modernize-use-nullptr, modernize-use-emplace
 
 ### Changes Applied:
+
 - Replaced `memcpy` with `std::copy` / `std::copy_n`
 - Replaced `memmove` with `std::copy`
 - Replaced `memset` with value initialization `{}`

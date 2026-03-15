@@ -36,7 +36,7 @@ protected:
 #if LIVEMEDIA_LIBRARY_VERSION_INT < 1610928000
 	virtual char const *sdpLines();
 #else
-	virtual char const *sdpLines(int addressFamily);
+	char const *sdpLines(int addressFamily) override;
 #endif
 	virtual char const *getAuxSDPLine(RTPSink *rtpSink, FramedSource *inputSource);
 	RTPSink *createRtpSink(
@@ -45,7 +45,7 @@ protected:
 	);
 
 protected:
-	RTPSink *m_rtpSink;
-	RTCPInstance *m_rtcpInstance;
+	RTPSink *m_rtpSink{};
+	RTCPInstance *m_rtcpInstance{};
 	std::map<int, std::string> m_SDPLines;
 };

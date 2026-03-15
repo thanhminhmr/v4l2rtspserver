@@ -11,16 +11,15 @@
 
 #pragma once
 
-#include <cstdint>
-#include <iomanip>
-#include <iostream>
 #include <list>
 #include <mutex>
 #include <string>
 #include <thread>
 
 // live555
-#include <liveMedia.hh>
+#include <FramedSource.hh>
+#include <UsageEnvironment.hh>
+#include <utility>
 
 #include "DeviceInterface.h"
 
@@ -33,7 +32,7 @@ public:
 	// Captured frame
 	// ---------------------------------
 	struct Frame {
-		Frame(char *buffer, int size, timeval timestamp, char *allocatedBuffer = nullptr)
+		Frame(char *buffer, const int size, const timeval timestamp, char *allocatedBuffer = nullptr)
 			: m_buffer(buffer), m_size(size), m_timestamp(timestamp), m_allocatedBuffer(allocatedBuffer) {};
 		Frame(const Frame &);
 		Frame &operator=(const Frame &);
@@ -50,7 +49,7 @@ public:
 	// ---------------------------------
 	class Stats {
 	public:
-		Stats(const std::string &msg) : m_fps(0), m_fps_sec(0), m_size(0), m_msg(msg) {};
+		Stats(std::string msg) : m_fps(0), m_fps_sec(0), m_size(0), m_msg(std::move(msg)) {};
 
 	public:
 		int notify(int tv_sec, int framesize);
@@ -65,7 +64,7 @@ public:
 	// ---------------------------------
 	// Capture Mode
 	// ---------------------------------
-	enum CaptureMode { CAPTURE_LIVE555_THREAD = 0, CAPTURE_INTERNAL_THREAD, NOCAPTURE };
+	enum CaptureMode { CAPTURE_LIVE555_THREAD = 0, CAPTURE_INTERNAL_THREAD, NO_CAPTURE };
 
 public:
 	static V4L2DeviceSource *createNew(
@@ -74,13 +73,13 @@ public:
 	);
 	std::string getAuxLine() { return m_auxLine; }
 	std::string getLastFrame() {
-		std::lock_guard<std::mutex> lock(m_lastFrameMutex);
+		std::lock_guard lock(m_lastFrameMutex);
 		std::string frame(m_lastFrame);
 		return frame;
 	}
 	DeviceInterface *getDevice() { return m_device; }
 	void postFrame(char *frame, int frameSize, const timeval &ref);
-	virtual std::list<std::string> getInitFrames() { return std::list<std::string>(); }
+	virtual std::list<std::string> getInitFrames() { return {}; }
 	virtual bool isKeyFrame(const char *, int) { return false; }
 
 protected:
@@ -88,14 +87,14 @@ protected:
 			UsageEnvironment &env, DeviceInterface *device, int outputFd, unsigned int queueSize,
 			CaptureMode captureMode
 	);
-	virtual ~V4L2DeviceSource();
+	~V4L2DeviceSource() override;
 
 protected:
 	virtual void *thread();
-	static void deliverFrameStub(void *clientData) { ((V4L2DeviceSource *)clientData)->deliverFrame(); };
+	static void deliverFrameStub(void *clientData) { static_cast<V4L2DeviceSource *>(clientData)->deliverFrame(); };
 	void deliverFrame();
 	static void incomingPacketHandlerStub(void *clientData, int mask) {
-		((V4L2DeviceSource *)clientData)->incomingPacketHandler();
+		static_cast<V4L2DeviceSource *>(clientData)->incomingPacketHandler();
 	};
 	void incomingPacketHandler();
 	int getNextFrame();
@@ -106,7 +105,7 @@ protected:
 	virtual std::list<std::pair<std::uint8_t *, size_t>> splitFrames(std::uint8_t *frame, unsigned frameSize);
 
 	// overide FramedSource
-	virtual void doGetNextFrame();
+	void doGetNextFrame() override;
 
 protected:
 	std::list<Frame *> m_captureQueue;

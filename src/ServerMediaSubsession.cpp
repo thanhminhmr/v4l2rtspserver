@@ -40,28 +40,28 @@ BaseServerMediaSubsession::createSource(UsageEnvironment &env, FramedSource *vid
 }
 
 RTPSink *BaseServerMediaSubsession::createSink(
-		UsageEnvironment &env, Groupsock *rtpGroupsock, unsigned char rtpPayloadTypeIfDynamic,
+		UsageEnvironment &env, Groupsock *rtpGroupSock, unsigned char rtpPayloadTypeIfDynamic,
 		const std::string &format, V4L2DeviceSource *source
 ) {
 	RTPSink *videoSink = nullptr;
 	if (format == "video/MP2T") {
 		videoSink = SimpleRTPSink::createNew(
-				env, rtpGroupsock, rtpPayloadTypeIfDynamic, 90000, "video", "MP2T", 1, True, False
+				env, rtpGroupSock, rtpPayloadTypeIfDynamic, 90000, "video", "MP2T", 1, True, False
 		);
 	} else if (format == "video/H264") {
-		videoSink = H264VideoRTPSink::createNew(env, rtpGroupsock, rtpPayloadTypeIfDynamic);
+		videoSink = H264VideoRTPSink::createNew(env, rtpGroupSock, rtpPayloadTypeIfDynamic);
 	} else if (format == "video/VP8") {
-		videoSink = VP8VideoRTPSink::createNew(env, rtpGroupsock, rtpPayloadTypeIfDynamic);
+		videoSink = VP8VideoRTPSink::createNew(env, rtpGroupSock, rtpPayloadTypeIfDynamic);
 	}
 #if LIVEMEDIA_LIBRARY_VERSION_INT > 1414454400
 	else if (format == "video/VP9") {
-		videoSink = VP9VideoRTPSink::createNew(env, rtpGroupsock, rtpPayloadTypeIfDynamic);
+		videoSink = VP9VideoRTPSink::createNew(env, rtpGroupSock, rtpPayloadTypeIfDynamic);
 	} else if (format == "video/H265") {
-		videoSink = H265VideoRTPSink::createNew(env, rtpGroupsock, rtpPayloadTypeIfDynamic);
+		videoSink = H265VideoRTPSink::createNew(env, rtpGroupSock, rtpPayloadTypeIfDynamic);
 	}
 #endif
 	else if (format == "video/JPEG") {
-		videoSink = JPEGVideoRTPSink::createNew(env, rtpGroupsock);
+		videoSink = JPEGVideoRTPSink::createNew(env, rtpGroupSock);
 	}
 #if LIVEMEDIA_LIBRARY_VERSION_INT >= 1596931200
 	else if (format == "video/RAW") {
@@ -94,7 +94,7 @@ RTPSink *BaseServerMediaSubsession::createSink(
 			break;
 		}
 		videoSink = RawVideoRTPSink::createNew(
-				env, rtpGroupsock, rtpPayloadTypeIfDynamic, device->getWidth(), device->getHeight(), 8,
+				env, rtpGroupSock, rtpPayloadTypeIfDynamic, device->getWidth(), device->getHeight(), 8,
 				sampling.c_str(), "BT709-2"
 		);
 	}
@@ -109,11 +109,11 @@ RTPSink *BaseServerMediaSubsession::createSink(
 		std::string channels("2");
 		getline(is, channels);
 		videoSink = SimpleRTPSink::createNew(
-				env, rtpGroupsock, rtpPayloadTypeIfDynamic, std::stoi(sampleRate), "audio", "L16", std::stoi(channels),
+				env, rtpGroupSock, rtpPayloadTypeIfDynamic, std::stoi(sampleRate), "audio", "L16", std::stoi(channels),
 				True, False
 		);
 	} else if (format.find("audio/MPEG") == 0) {
-		videoSink = MPEG1or2AudioRTPSink::createNew(env, rtpGroupsock);
+		videoSink = MPEG1or2AudioRTPSink::createNew(env, rtpGroupSock);
 	}
 	return videoSink;
 }

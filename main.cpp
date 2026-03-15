@@ -13,11 +13,11 @@
 ** -------------------------------------------------------------------------*/
 
 #include <dirent.h>
-#include <errno.h>
-#include <signal.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include <cerrno>
+#include <csignal>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
 #include <sys/ioctl.h>
 
 #include <sstream>
@@ -176,7 +176,7 @@ int main(int argc, char **argv) {
 			realm = optarg;
 			break;
 		case 'U':
-			userPasswordList.push_back(optarg);
+			userPasswordList.emplace_back(optarg);
 			break;
 
 		// V4L2
@@ -303,11 +303,11 @@ int main(int argc, char **argv) {
 	}
 	std::list<std::string> devList;
 	while (optind < argc) {
-		devList.push_back(argv[optind]);
+		devList.emplace_back(argv[optind]);
 		optind++;
 	}
 	if (devList.empty()) {
-		devList.push_back(dev_name);
+		devList.emplace_back(dev_name);
 	}
 
 	// default format tries
@@ -339,7 +339,7 @@ int main(int argc, char **argv) {
 		LOG(ERROR) << "Failed to create RTSP server: " << rtspServer.getResultMsg();
 	} else {
 		// decode multicast info
-		struct in_addr destinationAddress;
+		struct in_addr destinationAddress{};
 		unsigned short rtpPortNum;
 		unsigned short rtcpPortNum;
 		rtspServer.decodeMulticastUrl(maddr, destinationAddress, rtpPortNum, rtcpPortNum);
@@ -348,7 +348,7 @@ int main(int argc, char **argv) {
 		int nbSource = 0;
 		std::list<std::string>::iterator devIt;
 		for (devIt = devList.begin(); devIt != devList.end(); ++devIt) {
-			std::string deviceName(*devIt);
+			const std::string& deviceName(*devIt);
 
 			std::string videoDev;
 			std::string audioDev;

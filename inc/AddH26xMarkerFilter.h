@@ -24,14 +24,14 @@ public:
 		m_buffer.resize(m_bufferSize);
 	}
 
-	~AddH26xMarkerFilter() = default;
+	~AddH26xMarkerFilter() override = default;
 
 private:
 	static void afterGettingFrame(
 			void *clientData, unsigned frameSize, unsigned numTruncatedBytes, struct timeval presentationTime,
 			unsigned durationInMicroseconds
 	) {
-		auto *sink = reinterpret_cast<AddH26xMarkerFilter *>(clientData);
+		auto *sink = static_cast<AddH26xMarkerFilter *>(clientData);
 		sink->afterGettingFrame(frameSize, numTruncatedBytes, presentationTime);
 	}
 

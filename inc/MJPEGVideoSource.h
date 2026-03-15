@@ -50,7 +50,7 @@ public:
 	u_int8_t height() override { return m_height; };
 	u_int16_t restartInterval() override { return m_restartInterval; }
 
-	u_int8_t const *quantizationTables(u_int8_t &precision, u_int16_t &length);
+	u_int8_t const *quantizationTables(u_int8_t &precision, u_int16_t &length) override;
 
 protected:
 	MJPEGVideoSource(UsageEnvironment &env, FramedSource *source)

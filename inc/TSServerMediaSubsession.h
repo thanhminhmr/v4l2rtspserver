@@ -19,25 +19,25 @@
 class TSServerMediaSubsession : public UnicastServerMediaSubsession {
 public:
 	static TSServerMediaSubsession *createNew(
-			UsageEnvironment &env, StreamReplicator *videoreplicator, StreamReplicator *audioreplicator,
-			unsigned int sliceDuration
+			UsageEnvironment &env, StreamReplicator *videoReplicator, StreamReplicator *audioReplicator,
+			const unsigned int sliceDuration
 	) {
-		return new TSServerMediaSubsession(env, videoreplicator, audioreplicator, sliceDuration);
+		return new TSServerMediaSubsession(env, videoReplicator, audioReplicator, sliceDuration);
 	}
 
 protected:
 	TSServerMediaSubsession(
-			UsageEnvironment &env, StreamReplicator *videoreplicator, StreamReplicator *audioreplicator,
+			UsageEnvironment &env, StreamReplicator *videoReplicator, StreamReplicator *audioReplicator,
 			unsigned int sliceDuration
 	);
-	virtual ~TSServerMediaSubsession();
+	~TSServerMediaSubsession() override;
 
-	virtual float getCurrentNPT(void *streamToken);
-	virtual float duration() const;
-	virtual void seekStream(
-			unsigned clientSessionId, void *streamToken, double &seekNPT, double streamDuration, u_int64_t &numBytes
-	);
-	virtual FramedSource *getStreamSource(void *streamToken);
+	float getCurrentNPT(void *streamToken) override;
+	[[nodiscard]] float duration() const override;
+	void seekStream(
+			unsigned clientSessionId, void *streamToken, double &seekNPT, double streamDuration, std::uint64_t &numBytes
+	) override;
+	FramedSource *getStreamSource(void *streamToken) override;
 
 protected:
 	unsigned int m_slice;

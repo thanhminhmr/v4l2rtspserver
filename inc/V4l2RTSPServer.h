@@ -13,26 +13,26 @@
 
 #include <list>
 
-// live555
-#include <BasicUsageEnvironment.hh>
-#include <GroupsockHelper.hh>
-
 #include "HTTPServer.h"
 #include "MulticastServerMediaSubsession.h"
 #include "TSServerMediaSubsession.h"
 #include "UnicastServerMediaSubsession.h"
-#include "V4l2Output.h"
+
+// live555
+#include <BasicUsageEnvironment.hh>
+#include <StreamReplicator.hh>
 
 class V4l2RTSPServer {
 public:
 	V4l2RTSPServer(
-			unsigned short rtspPort, unsigned short rtspOverHTTPPort = 0, int timeout = 10, unsigned int hlsSegment = 0,
+			const unsigned short rtspPort, const unsigned short rtspOverHTTPPort = 0, const int timeout = 10,
+			const unsigned int hlsSegment = 0,
 			const std::list<std::string> &userPasswordList = std::list<std::string>(), const char *realm = nullptr,
-			const std::string &webroot = "", const std::string &sslkeycert = "", bool enableRTSPS = false
+			const std::string &webroot = "", const std::string &sslKeyCert = "", const bool enableRTSPS = false
 	)
 		: m_stop(0), m_env(BasicUsageEnvironment::createNew(*BasicTaskScheduler::createNew())), m_rtspPort(rtspPort) {
 		m_rtspServer = HTTPServer::createNew(
-				*m_env, rtspPort, userPasswordList, realm, timeout, hlsSegment, webroot, sslkeycert, enableRTSPS
+				*m_env, rtspPort, userPasswordList, realm, timeout, hlsSegment, webroot, sslKeyCert, enableRTSPS
 		);
 		if (m_rtspServer != nullptr) {
 			if (rtspOverHTTPPort) {
@@ -43,27 +43,26 @@ public:
 
 	virtual ~V4l2RTSPServer() {
 		Medium::close(m_rtspServer);
-		TaskScheduler *scheduler = &(m_env->taskScheduler());
+		const TaskScheduler *scheduler = &m_env->taskScheduler();
 		m_env->reclaim();
 		delete scheduler;
 	}
 
-	bool available() { return ((m_env != nullptr) && (m_rtspServer != nullptr)); }
-	std::string getResultMsg() {
-		std::string result("UsageEnvironment not exists");
+	[[nodiscard]] bool available() const { return m_env != nullptr && m_rtspServer != nullptr; }
+	[[nodiscard]] std::string getResultMsg() const {
 		if (m_env) {
-			result = m_env->getResultMsg();
+			return m_env->getResultMsg();
 		}
-		return result;
+		return "UsageEnvironment not exists";
 	}
 
-	void eventLoop(char *stop) { m_env->taskScheduler().doEventLoop(stop); }
+	void eventLoop(char *stop) const { m_env->taskScheduler().doEventLoop(stop); }
 
 	void eventLoop() { m_env->taskScheduler().doEventLoop(&m_stop); }
 
 	void stopLoop() { m_stop = 1; }
 
-	UsageEnvironment *env() { return m_env; }
+	[[nodiscard]] UsageEnvironment *env() const { return m_env; }
 
 	// -----------------------------------------
 	//    create video capture & replicator
@@ -71,13 +70,13 @@ public:
 	StreamReplicator *CreateVideoReplicator(
 			const V4L2DeviceParameters &inParam, int queueSize, V4L2DeviceSource::CaptureMode captureMode,
 			int repeatConfig, const std::string &outputFile, V4l2IoType ioTypeOut, V4l2Output *&out
-	);
+	) const;
 
 #ifdef HAVE_ALSA
 	StreamReplicator *CreateAudioReplicator(
 			const std::string &audioDev, const std::list<snd_pcm_format_t> &audioFmtList, int audioFreq,
 			int audioNbChannels, int verbose, int queueSize, V4L2DeviceSource::CaptureMode captureMode
-	);
+	) const;
 
 	static std::string getV4l2Alsa(const std::string &v4l2device);
 	static snd_pcm_format_t decodeAudioFormat(const std::string &fmt);
@@ -87,8 +86,9 @@ public:
 	// -----------------------------------------
 	//    Add unicast Session
 	// -----------------------------------------
-	ServerMediaSession *
-	AddUnicastSession(const std::string &url, StreamReplicator *videoReplicator, StreamReplicator *audioReplicator) {
+	ServerMediaSession *AddUnicastSession(
+			const std::string &url, StreamReplicator *videoReplicator, StreamReplicator *audioReplicator
+	) const {
 		// Create Unicast Session
 		std::list<ServerMediaSubsession *> subSession;
 		if (videoReplicator) {
@@ -104,7 +104,8 @@ public:
 	//    Add HLS & MPEG# Session
 	// -----------------------------------------
 	ServerMediaSession *AddHlsSession(
-			const std::string &url, int hlsSegment, StreamReplicator *videoReplicator, StreamReplicator *audioReplicator
+			const std::string &url, const int hlsSegment, StreamReplicator *videoReplicator,
+			StreamReplicator *audioReplicator
 	) {
 		std::list<ServerMediaSubsession *> subSession;
 		if (videoReplicator) {
@@ -114,7 +115,7 @@ public:
 		}
 		ServerMediaSession *sms = this->addSession(url, subSession);
 
-		struct in_addr ip;
+		struct in_addr ip{};
 #if LIVEMEDIA_LIBRARY_VERSION_INT < 1611878400
 		ip.s_addr = ourIPAddress(*this->env());
 #else
@@ -130,13 +131,13 @@ public:
 	//    Add multicats Session
 	// -----------------------------------------
 	ServerMediaSession *AddMulticastSession(
-			const std::string &url, in_addr destinationAddress, unsigned short &rtpPortNum, unsigned short &rtcpPortNum,
-			StreamReplicator *videoReplicator, StreamReplicator *audioReplicator
-	) {
+			const std::string &url, const in_addr destinationAddress, unsigned short &rtpPortNum,
+			unsigned short &rtcpPortNum, StreamReplicator *videoReplicator, StreamReplicator *audioReplicator
+	) const {
 
 		LOG(NOTICE) << "RTP  address " << inet_ntoa(destinationAddress) << ":" << rtpPortNum;
 		LOG(NOTICE) << "RTCP address " << inet_ntoa(destinationAddress) << ":" << rtcpPortNum;
-		unsigned char ttl = 5;
+		const unsigned char ttl = 5;
 		std::list<ServerMediaSubsession *> subSession;
 		if (videoReplicator) {
 			subSession.push_back(
@@ -166,7 +167,7 @@ public:
 	std::string decodeMulticastUrl(
 			const std::string &maddr, in_addr &destinationAddress, unsigned short &rtpPortNum,
 			unsigned short &rtcpPortNum
-	) {
+	) const {
 		std::istringstream is(maddr);
 		std::string ip;
 		getline(is, ip, ':');
@@ -191,11 +192,11 @@ public:
 			   std::to_string(rtcpPortNum);
 	}
 
-	ServerMediaSession *AddMulticastSession(
+	[[nodiscard]] ServerMediaSession *AddMulticastSession(
 			const std::string &url, const std::string &inmulticasturi, std::string &outmulticasturi,
 			StreamReplicator *videoReplicator, StreamReplicator *audioReplicator
-	) {
-		struct in_addr destinationAddress;
+	) const {
+		struct in_addr destinationAddress{};
 		unsigned short rtpPortNum;
 		unsigned short rtcpPortNum;
 		outmulticasturi = this->decodeMulticastUrl(inmulticasturi, destinationAddress, rtpPortNum, rtcpPortNum);
@@ -207,35 +208,38 @@ public:
 	// -----------------------------------------
 	//    get rtsp url
 	// -----------------------------------------
-	std::string getRtspUrl(ServerMediaSession *sms) {
+	std::string getRtspUrl(ServerMediaSession *sms) const {
 		std::string url;
-		char *rtspurl = m_rtspServer->rtspURL(sms);
+		const char *rtspurl = m_rtspServer->rtspURL(sms);
 		if (rtspurl != nullptr) {
 			url = rtspurl;
 			delete[] rtspurl;
 		}
 		return url;
 	}
-	int numClientSessions() { return m_rtspServer->numClientSessions(); }
 
-	void RemoveSession(ServerMediaSession *sms) { m_rtspServer->deleteServerMediaSession(sms); }
+	[[nodiscard]] int numClientSessions() const { return m_rtspServer->numClientSessions(); }
 
-	void addUserRecord(const char *username, const char *password) { m_rtspServer->addUserRecord(username, password); }
+	void RemoveSession(ServerMediaSession *sms) const { m_rtspServer->deleteServerMediaSession(sms); }
 
-	std::list<std::string> getUsers() { return m_rtspServer->getUsers(); }
+	void addUserRecord(const char *username, const char *password) const {
+		m_rtspServer->addUserRecord(username, password);
+	}
 
-	void setTLS(const std::string &sslCert, bool enableRTSPS = false, bool encryptSRTP = true) {
+	[[nodiscard]] std::list<std::string> getUsers() const { return m_rtspServer->getUsers(); }
+
+	void setTLS(const std::string &sslCert, const bool enableRTSPS = false, const bool encryptSRTP = true) const {
 		m_rtspServer->setTLS(sslCert, enableRTSPS, encryptSRTP);
 	}
 
-	bool isRTSPS() { return m_rtspServer->isRTSPS(); }
+	[[nodiscard]] bool isRTSPS() const { return m_rtspServer->isRTSPS(); }
 
-	bool isSRTP() { return m_rtspServer->isSRTP(); }
+	[[nodiscard]] bool isSRTP() const { return m_rtspServer->isSRTP(); }
 
-	bool isSRTPEncrypted() { return m_rtspServer->isSRTPEncrypted(); }
+	[[nodiscard]] bool isSRTPEncrypted() const { return m_rtspServer->isSRTPEncrypted(); }
 
 protected:
-	ServerMediaSession *addSession(const std::string &sessionName, ServerMediaSubsession *subSession) {
+	ServerMediaSession *addSession(const std::string &sessionName, ServerMediaSubsession *subSession) const {
 		std::list<ServerMediaSubsession *> subSessionList;
 		if (subSession) {
 			subSessionList.push_back(subSession);
@@ -243,8 +247,8 @@ protected:
 		return this->addSession(sessionName, subSessionList);
 	}
 
-	ServerMediaSession *
-	addSession(const std::string &sessionName, const std::list<ServerMediaSubsession *> &subSession) {
+	[[nodiscard]] ServerMediaSession *
+	addSession(const std::string &sessionName, const std::list<ServerMediaSubsession *> &subSession) const {
 		ServerMediaSession *sms = nullptr;
 		if (subSession.empty() == false) {
 			sms = ServerMediaSession::createNew(*m_env, sessionName.c_str());
@@ -256,7 +260,7 @@ protected:
 
 				m_rtspServer->addServerMediaSession(sms);
 
-				char *url = m_rtspServer->rtspURL(sms);
+				const char *url = m_rtspServer->rtspURL(sms);
 				if (url != nullptr) {
 					LOG(NOTICE) << "Play this stream using the URL \"" << url << "\"";
 					delete[] url;

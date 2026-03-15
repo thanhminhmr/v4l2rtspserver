@@ -65,7 +65,7 @@ V4L2DeviceSource::V4L2DeviceSource(
 					m_device->getFd(), V4L2DeviceSource::incomingPacketHandlerStub, this
 			);
 			break;
-		case NOCAPTURE:
+		case NO_CAPTURE:
 		default:
 			break;
 		}

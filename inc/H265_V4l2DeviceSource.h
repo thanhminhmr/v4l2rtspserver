@@ -11,8 +11,6 @@
 
 #pragma once
 
-#include <cstdint>
-
 // project
 #include "H26x_V4l2DeviceSource.h"
 

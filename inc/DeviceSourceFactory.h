@@ -11,6 +11,8 @@
 
 #pragma once
 
+#include <StreamReplicator.hh>
+#include <MediaSink.hh>
 #include <linux/videodev2.h>
 
 #include "H264_V4l2DeviceSource.h"
@@ -20,34 +22,33 @@
 class DeviceSourceFactory {
 public:
 	static FramedSource *createFramedSource(
-			UsageEnvironment *env, int format, DeviceInterface *devCapture, int queueSize = 5,
-			V4L2DeviceSource::CaptureMode captureMode = V4L2DeviceSource::CAPTURE_INTERNAL_THREAD, int outfd = -1,
-			bool repeatConfig = true
+			UsageEnvironment *env, const int format, DeviceInterface *devCapture, const int queueSize = 5,
+			const V4L2DeviceSource::CaptureMode captureMode = V4L2DeviceSource::CAPTURE_INTERNAL_THREAD,
+			const int outFd = -1, const bool repeatConfig = true
 	) {
 		FramedSource *source = nullptr;
 		if (format == V4L2_PIX_FMT_H264) {
 			source = H264_V4L2DeviceSource::createNew(
-					*env, devCapture, outfd, queueSize, captureMode, repeatConfig, false
+					*env, devCapture, outFd, queueSize, captureMode, repeatConfig, false
 			);
 		} else if (format == V4L2_PIX_FMT_HEVC) {
 			source = H265_V4L2DeviceSource::createNew(
-					*env, devCapture, outfd, queueSize, captureMode, repeatConfig, false
+					*env, devCapture, outFd, queueSize, captureMode, repeatConfig, false
 			);
 		} else {
-			source = V4L2DeviceSource::createNew(*env, devCapture, outfd, queueSize, captureMode);
+			source = V4L2DeviceSource::createNew(*env, devCapture, outFd, queueSize, captureMode);
 		}
 		return source;
 	}
 
 	static StreamReplicator *createStreamReplicator(
-			UsageEnvironment *env, int format, DeviceInterface *devCapture, int queueSize = 5,
-			V4L2DeviceSource::CaptureMode captureMode = V4L2DeviceSource::CAPTURE_INTERNAL_THREAD, int outfd = -1,
-			bool repeatConfig = true
+			UsageEnvironment *env, const int format, DeviceInterface *devCapture, const int queueSize = 5,
+			const V4L2DeviceSource::CaptureMode captureMode = V4L2DeviceSource::CAPTURE_INTERNAL_THREAD,
+			const int outFd = -1, const bool repeatConfig = true
 	) {
 		StreamReplicator *replicator = nullptr;
-		FramedSource *framedSource = DeviceSourceFactory::createFramedSource(
-				env, format, devCapture, queueSize, captureMode, outfd, repeatConfig
-		);
+		FramedSource *framedSource =
+				createFramedSource(env, format, devCapture, queueSize, captureMode, outFd, repeatConfig);
 		if (framedSource != nullptr) {
 			// extend buffer size if needed
 			if (devCapture->getBufferSize() > OutPacketBuffer::maxSize) {

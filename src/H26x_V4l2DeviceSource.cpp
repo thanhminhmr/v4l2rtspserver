@@ -31,7 +31,7 @@ template <typename T> const T *memmem(const T *haystack, size_t haystackSize, co
 
 } // namespace
 
-std::uint8_t *H26X_V4L2DeviceSource::extractFrame(std::uint8_t *frame, size_t &size, size_t &outsize, int &frameType) {
+std::uint8_t *H26X_V4L2DeviceSource::extractFrame(std::uint8_t *frame, size_t &size, size_t &outsize, int &frameType) const {
 	std::uint8_t *outFrame = nullptr;
 	outsize = 0;
 	unsigned int markerlength = 0;

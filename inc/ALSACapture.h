@@ -36,7 +36,7 @@ struct ALSACaptureParameters {
 class ALSACapture : public DeviceInterface {
 public:
 	static ALSACapture *createNew(const ALSACaptureParameters &params);
-	virtual ~ALSACapture();
+	~ALSACapture() override;
 	void close();
 
 protected:
@@ -44,14 +44,14 @@ protected:
 	int configureFormat(snd_pcm_hw_params_t *hw_params);
 
 public:
-	virtual size_t read(char *buffer, size_t bufferSize);
-	virtual int getFd();
-	virtual unsigned long getBufferSize() { return m_bufferSize; }
+	size_t read(char *buffer, size_t bufferSize) override;
+	int getFd() override;
+	unsigned long getBufferSize() override { return m_bufferSize; }
 
-	virtual int getSampleRate() { return m_params.m_sampleRate; }
-	virtual int getChannels() { return m_params.m_channels; }
-	virtual int getAudioFormat() { return m_fmt; }
-	virtual std::list<int> getAudioFormatList() { return m_fmtList; }
+	int getSampleRate() override { return m_params.m_sampleRate; }
+	int getChannels() override { return m_params.m_channels; }
+	int getAudioFormat() override { return m_fmt; }
+	std::list<int> getAudioFormatList() override { return m_fmtList; }
 
 private:
 	snd_pcm_t *m_pcm;

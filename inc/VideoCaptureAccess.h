@@ -20,14 +20,14 @@
 class VideoCaptureAccess : public DeviceInterface {
 public:
 	VideoCaptureAccess(V4l2Capture *device) : m_device(device) {}
-	virtual ~VideoCaptureAccess() { delete m_device; }
+	~VideoCaptureAccess() override { delete m_device; }
 
-	virtual size_t read(char *buffer, size_t bufferSize) { return m_device->read(buffer, bufferSize); }
-	virtual int getFd() { return m_device->getFd(); }
-	virtual unsigned long getBufferSize() { return m_device->getBufferSize(); }
-	virtual int getWidth() { return m_device->getWidth(); }
-	virtual int getHeight() { return m_device->getHeight(); }
-	virtual int getVideoFormat() { return m_device->getFormat(); }
+	size_t read(char *buffer, size_t bufferSize) override { return m_device->read(buffer, bufferSize); }
+	int getFd() override { return m_device->getFd(); }
+	unsigned long getBufferSize() override { return m_device->getBufferSize(); }
+	int getWidth() override { return m_device->getWidth(); }
+	int getHeight() override { return m_device->getHeight(); }
+	int getVideoFormat() override { return m_device->getFormat(); }
 
 protected:
 	V4l2Capture *m_device;

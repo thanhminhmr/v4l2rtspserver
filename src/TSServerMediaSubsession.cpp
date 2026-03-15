@@ -14,12 +14,12 @@
 #include <memory>
 
 TSServerMediaSubsession::TSServerMediaSubsession(
-		UsageEnvironment &env, StreamReplicator *videoreplicator, StreamReplicator *audioreplicator,
+		UsageEnvironment &env, StreamReplicator *videoReplicator, StreamReplicator *audioReplicator,
 		unsigned int sliceDuration
 )
-	: UnicastServerMediaSubsession(env, videoreplicator), m_slice(0) {
+	: UnicastServerMediaSubsession(env, videoReplicator), m_slice(0) {
 	// Create a source
-	FramedSource *source = videoreplicator->createStreamReplica();
+	FramedSource *source = videoReplicator->createStreamReplica();
 	MPEG2TransportStreamFromESSource *muxer = MPEG2TransportStreamFromESSource::createNew(env);
 
 	if (m_format == "video/H264") {

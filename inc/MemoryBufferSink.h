@@ -27,15 +27,15 @@ public:
 
 protected:
 	MemoryBufferSink(UsageEnvironment &env, unsigned bufferSize, unsigned int sliceDuration, unsigned int nbSlices);
-	virtual ~MemoryBufferSink();
+	~MemoryBufferSink() override;
 
-	virtual Boolean continuePlaying();
+	Boolean continuePlaying() override;
 
 	static void afterGettingFrame(
 			void *clientData, unsigned frameSize, unsigned numTruncatedBytes, struct timeval presentationTime,
 			unsigned durationInMicroseconds
 	) {
-		MemoryBufferSink *sink = reinterpret_cast<MemoryBufferSink *>(clientData);
+		auto *sink = reinterpret_cast<MemoryBufferSink *>(clientData);
 		sink->afterGettingFrame(frameSize, numTruncatedBytes, presentationTime);
 	}
 
@@ -46,7 +46,7 @@ public:
 	std::string getBuffer(unsigned int slice);
 	unsigned int firstTime();
 	unsigned int duration();
-	unsigned int getSliceDuration() { return m_sliceDuration; }
+	unsigned int getSliceDuration() const { return m_sliceDuration; }
 
 private:
 	std::vector<std::uint8_t> m_buffer;

@@ -14,22 +14,27 @@
 #pragma once
 
 #include <list>
-#include <string>
 #include <sstream>
+#include <string>
 
 // hacking private members RTSPServer::fWeServeSRTP & RTSPServer::fWeEncryptSRTP
+#ifndef _RTSP_SERVER_HH
 #define private protected
 #include "RTSPServer.hh"
 #undef private
-#include "RTSPCommon.hh"
+#else
+#error "RTSPServer.hh already included, cannot hacking access to private members"
+#endif
+
 #include <GroupsockHelper.hh> // for "ignoreSigPipeOnSocket()"
+#include <utility>
 
 #define TCP_STREAM_SINK_MIN_READ_SIZE 1000
 #define TCP_STREAM_SINK_BUFFER_SIZE 10000
 
 class TCPSink : public MediaSink {
 public:
-	TCPSink(UsageEnvironment &env, int socketNum)
+	TCPSink(UsageEnvironment &env, const int socketNum)
 		: MediaSink(env), fUnwrittenBytesStart(0), fUnwrittenBytesEnd(0), fInputSourceIsOpen(False),
 		  fOutputSocketIsWritable(True), fOutputSocketNum(socketNum) {
 		ignoreSigPipeOnSocket(socketNum);
@@ -49,9 +54,9 @@ private:
 	void processBuffer() {
 		// First, try writing data to our output socket, if we can:
 		if (fOutputSocketIsWritable && numUnwrittenBytes() > 0) {
-			int numBytesWritten =
-					send(fOutputSocketNum, (const char *)&fBuffer[fUnwrittenBytesStart], numUnwrittenBytes(), 0);
-			if (numBytesWritten < (int)numUnwrittenBytes()) {
+			const size_t numBytesWritten =
+					send(fOutputSocketNum, &fBuffer[fUnwrittenBytesStart], numUnwrittenBytes(), 0);
+			if (numBytesWritten < numUnwrittenBytes()) {
 				// The output socket is no longer writable.  Set a handler to be called when it becomes writable again.
 				fOutputSocketIsWritable = False;
 				if (envir().getErrno() !=
@@ -86,23 +91,24 @@ private:
 	}
 
 	static void socketWritableHandler(void *clientData, int mask) {
-		reinterpret_cast<TCPSink *>(clientData)->socketWritableHandler();
+		static_cast<TCPSink *>(clientData)->socketWritableHandler();
 	}
 	void socketWritableHandler() {
-		envir().taskScheduler().disableBackgroundHandling(fOutputSocketNum
+		envir().taskScheduler().disableBackgroundHandling(
+				fOutputSocketNum
 		); // disable this handler until the next time it's needed
 		fOutputSocketIsWritable = True;
 		processBuffer();
 	}
 
 	static void afterGettingFrame(
-			void *clientData, unsigned frameSize, unsigned numTruncatedBytes, struct timeval presentationTime,
-			unsigned durationInMicroseconds
+			void *clientData, const unsigned frameSize, const unsigned numTruncatedBytes,
+			[[maybe_unused]] const timeval presentationTime, [[maybe_unused]] const unsigned durationInMicroseconds
 	) {
-		reinterpret_cast<TCPSink *>(clientData)->afterGettingFrame(frameSize, numTruncatedBytes);
+		static_cast<TCPSink *>(clientData)->afterGettingFrame(frameSize, numTruncatedBytes);
 	}
 
-	void afterGettingFrame(unsigned frameSize, unsigned numTruncatedBytes) {
+	void afterGettingFrame(const unsigned frameSize, const unsigned numTruncatedBytes) {
 		if (numTruncatedBytes > 0) {
 			envir() << "TCPStreamSink::afterGettingFrame(): The input frame data was too large for our buffer.  "
 					<< numTruncatedBytes
@@ -113,7 +119,7 @@ private:
 		processBuffer();
 	}
 
-	static void ourOnSourceClosure(void *clientData) { reinterpret_cast<TCPSink *>(clientData)->ourOnSourceClosure(); }
+	static void ourOnSourceClosure(void *clientData) { static_cast<TCPSink *>(clientData)->ourOnSourceClosure(); }
 
 	void ourOnSourceClosure() {
 		// The input source has closed:
@@ -121,12 +127,12 @@ private:
 		processBuffer();
 	}
 
-	[[nodiscard]] unsigned numUnwrittenBytes() const { return fUnwrittenBytesEnd - fUnwrittenBytesStart; }
-	[[nodiscard]] unsigned freeBufferSpace() const { return TCP_STREAM_SINK_BUFFER_SIZE - fUnwrittenBytesEnd; }
+	[[nodiscard]] size_t numUnwrittenBytes() const { return fUnwrittenBytesEnd - fUnwrittenBytesStart; }
+	[[nodiscard]] size_t freeBufferSpace() const { return TCP_STREAM_SINK_BUFFER_SIZE - fUnwrittenBytesEnd; }
 
 private:
-	unsigned char fBuffer[TCP_STREAM_SINK_BUFFER_SIZE];
-	unsigned fUnwrittenBytesStart, fUnwrittenBytesEnd;
+	uint8_t fBuffer[TCP_STREAM_SINK_BUFFER_SIZE]{};
+	size_t fUnwrittenBytesStart, fUnwrittenBytesEnd;
 	Boolean fInputSourceIsOpen, fOutputSocketIsWritable;
 	int fOutputSocketNum;
 };
@@ -134,36 +140,26 @@ private:
 // ---------------------------------------------------------
 //  Extend RTSP server to add support for HLS and MPEG-DASH
 // ---------------------------------------------------------
-#if LIVEMEDIA_LIBRARY_VERSION_INT < 1606435200
-#define SOCKETCLIENT sockaddr_in
-#else
-#define SOCKETCLIENT sockaddr_storage const &
-#endif
 class HTTPServer : public RTSPServer {
-
-	class HTTPClientConnection : public RTSPServer::RTSPClientConnection {
+	class HTTPClientConnection : public RTSPClientConnection {
 	public:
-		HTTPClientConnection(RTSPServer &ourServer, int clientSocket, struct SOCKETCLIENT clientAddr, Boolean useTLS)
-#if LIVEMEDIA_LIBRARY_VERSION_INT >= 1642723200
-			: RTSPServer::RTSPClientConnection(ourServer, clientSocket, clientAddr, useTLS), m_TCPSink(nullptr),
-			  m_StreamToken(nullptr), m_Subsession(nullptr), m_Source(nullptr) {
-#else
-			: RTSPServer::RTSPClientConnection(ourServer, clientSocket, clientAddr), m_TCPSink(nullptr),
-			  m_StreamToken(nullptr), m_Subsession(nullptr), m_Source(nullptr) {
-#endif
-		}
-		virtual ~HTTPClientConnection();
+		HTTPClientConnection(
+				RTSPServer &ourServer, const int clientSocket, sockaddr_storage const &clientAddr, const Boolean useTLS
+		)
+			: RTSPClientConnection(ourServer, clientSocket, clientAddr, useTLS), m_TCPSink(nullptr),
+			  m_StreamToken(nullptr), m_Subsession(nullptr), m_Source(nullptr) {}
+		~HTTPClientConnection() override;
 
 	private:
 		void sendHeader(const char *contentType, unsigned int contentLength);
 		void streamSource(FramedSource *source);
 		void streamSource(const std::string &content);
-		ServerMediaSubsession *getSubsesion(const char *urlSuffix);
+		ServerMediaSubsession *getSubsession(const char *urlSuffix);
 		bool sendFile(char const *urlSuffix);
 		bool sendM3u8PlayList(char const *urlSuffix);
 		bool sendMpdPlayList(char const *urlSuffix);
-		virtual void handleHTTPCmd_StreamingGET(char const *urlSuffix, char const *fullRequestStr);
-		virtual void handleCmd_notFound();
+		void handleHTTPCmd_StreamingGET(char const *urlSuffix, char const *fullRequestStr) override;
+		void handleCmd_notFound() override;
 		static void afterStreaming(void *clientData);
 
 	private:
@@ -174,29 +170,28 @@ class HTTPServer : public RTSPServer {
 		FramedSource *m_Source;
 	};
 
-	class HTTPClientSession : public RTSPServer::RTSPClientSession {
+	class HTTPClientSession : public RTSPClientSession {
 	public:
-		HTTPClientSession(HTTPServer &ourServer, u_int32_t sessionId)
-			: RTSPServer::RTSPClientSession(ourServer, sessionId) {}
-		virtual void handleCmd_SETUP(
-				RTSPServer::RTSPClientConnection *ourClientConnection, char const *urlPreSuffix, char const *urlSuffix,
+		HTTPClientSession(HTTPServer &ourServer, const u_int32_t sessionId) : RTSPClientSession(ourServer, sessionId) {}
+		void handleCmd_SETUP(
+				RTSPClientConnection *ourClientConnection, char const *urlPreSuffix, char const *urlSuffix,
 				char const *fullRequestStr
-		);
+		) override;
 	};
 
 	class MyUserAuthenticationDatabase : public UserAuthenticationDatabase {
 	public:
-		MyUserAuthenticationDatabase(char const *realm = nullptr, Boolean passwordsAreMD5 = False)
+		MyUserAuthenticationDatabase(char const *realm = nullptr, const Boolean passwordsAreMD5 = False)
 			: UserAuthenticationDatabase(realm, passwordsAreMD5) {}
-		virtual ~MyUserAuthenticationDatabase() {}
+		~MyUserAuthenticationDatabase() override = default;
 
-		std::list<std::string> getUsers() {
+		[[nodiscard]] std::list<std::string> getUsers() const {
 			std::list<std::string> users;
-			HashTable::Iterator *iter(HashTable::Iterator::create(*fTable));
+			HashTable::Iterator *iter = HashTable::Iterator::create(*fTable);
 			char const *key;
 			char *user;
-			while ((user = reinterpret_cast<char *>(iter->next(key))) != nullptr) {
-				users.push_back(user);
+			while ((user = static_cast<char *>(iter->next(key))) != nullptr) {
+				users.emplace_back(user);
 			}
 			return users;
 		}
@@ -204,12 +199,10 @@ class HTTPServer : public RTSPServer {
 		static MyUserAuthenticationDatabase *
 		createNew(const std::list<std::string> &userPasswordList, const char *realm) {
 			MyUserAuthenticationDatabase *auth = nullptr;
-			if (userPasswordList.size() > 0) {
-				auth = new MyUserAuthenticationDatabase(realm, (realm != nullptr));
-
-				std::list<std::string>::const_iterator it;
-				for (it = userPasswordList.begin(); it != userPasswordList.end(); ++it) {
-					std::istringstream is(*it);
+			if (!userPasswordList.empty()) {
+				auth = new MyUserAuthenticationDatabase(realm, realm != nullptr);
+				for (const auto &it : userPasswordList) {
+					std::istringstream is(it);
 					std::string user;
 					getline(is, user, ':');
 					std::string password;
@@ -225,20 +218,12 @@ class HTTPServer : public RTSPServer {
 public:
 	static HTTPServer *createNew(
 			UsageEnvironment &env, Port rtspPort, const std::list<std::string> &userPasswordList, const char *realm,
-			unsigned reclamationTestSeconds, unsigned int hlsSegment, const std::string &webroot,
-			const std::string &sslCert, bool enableRTSPS
+			const unsigned reclamationTestSeconds, const unsigned int hlsSegment, const std::string &webroot,
+			const std::string &sslCert, const bool enableRTSPS
 	) {
 		HTTPServer *httpServer = nullptr;
-#if LIVEMEDIA_LIBRARY_VERSION_INT < 1610928000
-		int ourSocketIPv4 = setUpOurSocket(env, rtspPort);
-#else
-		int ourSocketIPv4 = setUpOurSocket(env, rtspPort, AF_INET);
-#endif
-#if LIVEMEDIA_LIBRARY_VERSION_INT < 1611187200
-		int ourSocketIPv6 = -1;
-#else
-		int ourSocketIPv6 = setUpOurSocket(env, rtspPort, AF_INET6);
-#endif
+		const int ourSocketIPv4 = setUpOurSocket(env, rtspPort, AF_INET);
+		const int ourSocketIPv6 = setUpOurSocket(env, rtspPort, AF_INET6);
 
 		if (ourSocketIPv4 != -1) {
 			MyUserAuthenticationDatabase *authDatabase =
@@ -251,40 +236,28 @@ public:
 		return httpServer;
 	}
 
-#if LIVEMEDIA_LIBRARY_VERSION_INT < 1611187200
 	HTTPServer(
-			UsageEnvironment &env, int ourSocketIPv4, int ourSocketIPv6, Port rtspPort,
-			MyUserAuthenticationDatabase *authDatabase, unsigned reclamationTestSeconds, unsigned int hlsSegment,
-			const std::string &webroot, const std::string &sslCert, bool enableRTSPS
-	)
-		: RTSPServer(env, ourSocketIPv4, rtspPort, authDatabase, reclamationTestSeconds), m_hlsSegment(hlsSegment),
-		  m_webroot(webroot)
-#else
-	HTTPServer(
-			UsageEnvironment &env, int ourSocketIPv4, int ourSocketIPv6, Port rtspPort,
-			MyUserAuthenticationDatabase *authDatabase, unsigned reclamationTestSeconds, unsigned int hlsSegment,
-			const std::string &webroot, const std::string &sslCert, bool enableRTSPS
+			UsageEnvironment &env, const int ourSocketIPv4, const int ourSocketIPv6, const Port rtspPort,
+			MyUserAuthenticationDatabase *authDatabase, const unsigned reclamationTestSeconds,
+			const unsigned int hlsSegment, std::string webroot, const std::string &sslCert, const bool enableRTSPS
 	)
 		: RTSPServer(env, ourSocketIPv4, ourSocketIPv6, rtspPort, authDatabase, reclamationTestSeconds),
-		  m_hlsSegment(hlsSegment), m_webroot(webroot)
-#endif
-	{
-		if ((!m_webroot.empty()) && (*m_webroot.rend() != '/')) {
+		  m_hlsSegment(hlsSegment), m_webroot(std::move(webroot)) {
+		if (!m_webroot.empty() && *m_webroot.rend() != '/') {
 			m_webroot += "/";
 		}
 		this->setTLS(sslCert, enableRTSPS);
 	}
 
-	virtual RTSPServer::ClientConnection *createNewClientConnection(int clientSocket, struct SOCKETCLIENT clientAddr) {
+	ClientConnection *createNewClientConnection(const int clientSocket, sockaddr_storage const &clientAddr) override {
 		return new HTTPClientConnection(*this, clientSocket, clientAddr, isRTSPS());
 	}
 
-	virtual RTSPServer::ClientSession *createNewClientSession(u_int32_t sessionId) {
+	ClientSession *createNewClientSession(const u_int32_t sessionId) override {
 		return new HTTPClientSession(*this, sessionId);
 	}
 
-	void setTLS(const std::string &sslCert, bool enableRTSPS = false, bool encryptSRTP = true) {
-#if (LIVEMEDIA_LIBRARY_VERSION_INT >= 1642723200) && (LIVEMEDIA_LIBRARY_VERSION_INT < 1772064000)
+	void setTLS(const std::string &sslCert, const bool enableRTSPS = false, const bool encryptSRTP = true) {
 		if (!sslCert.empty()) {
 			this->setTLSFileNames(sslCert.c_str(), sslCert.c_str());
 			fWeServeSRTP = true;
@@ -299,55 +272,33 @@ public:
 			fWeServeSRTP = false;
 			fWeEncryptSRTP = false;
 		}
-#endif
 	}
 
-	bool isRTSPS() {
-#if (LIVEMEDIA_LIBRARY_VERSION_INT >= 1642723200) && (LIVEMEDIA_LIBRARY_VERSION_INT < 1772064000)
-		return fOurConnectionsUseTLS;
-#else
-		return false;
-#endif
-	}
+	bool isRTSPS() { return fOurConnectionsUseTLS; }
 
-	bool isSRTP() {
-#if (LIVEMEDIA_LIBRARY_VERSION_INT >= 1642723200) && (LIVEMEDIA_LIBRARY_VERSION_INT < 1772064000)
-		return fWeServeSRTP;
-#else
-		return false;
-#endif
-	}
+	bool isSRTP() { return fWeServeSRTP; }
 
-	bool isSRTPEncrypted() {
-#if (LIVEMEDIA_LIBRARY_VERSION_INT >= 1642723200) && (LIVEMEDIA_LIBRARY_VERSION_INT < 1772064000)
-		return fWeEncryptSRTP;
-#else
-		return false;
-#endif
-	}
+	bool isSRTPEncrypted() { return fWeEncryptSRTP; }
 
 	void addUserRecord(const char *username, const char *password) {
-		UserAuthenticationDatabase *auth = this->getAuthenticationDatabaseForCommand(nullptr);
-		if (auth != nullptr) {
+		if (UserAuthenticationDatabase *auth = this->getAuthenticationDatabaseForCommand(nullptr); auth != nullptr) {
 			auth->addUserRecord(username, password);
 		}
 	}
 
 	void removeUserRecord(const char *username) {
-		UserAuthenticationDatabase *auth = this->getAuthenticationDatabaseForCommand(nullptr);
-		if (auth != nullptr) {
+		if (UserAuthenticationDatabase *auth = this->getAuthenticationDatabaseForCommand(nullptr); auth != nullptr) {
 			auth->removeUserRecord(username);
 		}
 	}
 
 	std::list<std::string> getUsers() {
-		std::list<std::string> users;
-		auto *auth =
-				reinterpret_cast<MyUserAuthenticationDatabase *>(this->getAuthenticationDatabaseForCommand(nullptr));
+		const auto *auth =
+				dynamic_cast<MyUserAuthenticationDatabase *>(this->getAuthenticationDatabaseForCommand(nullptr));
 		if (auth != nullptr) {
-			users = auth->getUsers();
+			return auth->getUsers();
 		}
-		return users;
+		return {};
 	}
 
 private:

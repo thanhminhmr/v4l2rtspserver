@@ -37,15 +37,11 @@
 class BaseServerMediaSubsession {
 public:
 	BaseServerMediaSubsession(StreamReplicator *replicator) : m_replicator(replicator) {
-		auto *deviceSource = dynamic_cast<V4L2DeviceSource *>(replicator->inputSource());
-		if (deviceSource) {
-			DeviceInterface *device = deviceSource->getDevice();
-			if (device->getVideoFormat() >= 0) {
-				m_format = BaseServerMediaSubsession::getVideoRtpFormat(device->getVideoFormat());
+		if (auto *deviceSource = dynamic_cast<V4L2DeviceSource *>(replicator->inputSource())) {
+			if (DeviceInterface *device = deviceSource->getDevice(); device->getVideoFormat() >= 0) {
+				m_format = getVideoRtpFormat(device->getVideoFormat());
 			} else {
-				m_format = BaseServerMediaSubsession::getAudioRtpFormat(
-						device->getAudioFormat(), device->getSampleRate(), device->getChannels()
-				);
+				m_format = getAudioRtpFormat(device->getAudioFormat(), device->getSampleRate(), device->getChannels());
 			}
 			LOG(NOTICE) << "RTP format:" << m_format;
 		}
@@ -54,7 +50,7 @@ public:
 	// -----------------------------------------
 	//    convert V4L2 pix format to RTP mime
 	// -----------------------------------------
-	static std::string getVideoRtpFormat(int format) {
+	static std::string getVideoRtpFormat(const int format) {
 		switch (format) {
 		case V4L2_PIX_FMT_HEVC:
 			return "video/H265";
@@ -81,7 +77,7 @@ public:
 		}
 	}
 
-	static std::string getAudioRtpFormat(int format, int sampleRate, int channels) {
+	static std::string getAudioRtpFormat(const int format, const int sampleRate, const int channels) {
 		std::ostringstream os;
 #ifdef HAVE_ALSA
 		os << "audio/";
@@ -118,18 +114,16 @@ public:
 public:
 	static FramedSource *createSource(UsageEnvironment &env, FramedSource *videoES, const std::string &format);
 	static RTPSink *createSink(
-			UsageEnvironment &env, Groupsock *rtpGroupsock, unsigned char rtpPayloadTypeIfDynamic,
+			UsageEnvironment &env, Groupsock *rtpGroupSock, unsigned char rtpPayloadTypeIfDynamic,
 			const std::string &format, V4L2DeviceSource *source
 	);
-	char const *getAuxLine(V4L2DeviceSource *source, RTPSink *rtpSink);
+	static char const *getAuxLine(V4L2DeviceSource *source, RTPSink *rtpSink);
 
 	[[nodiscard]] std::string getLastFrame() const {
-		auto *deviceSource = dynamic_cast<V4L2DeviceSource *>(m_replicator->inputSource());
-		if (deviceSource) {
+		if (auto *deviceSource = dynamic_cast<V4L2DeviceSource *>(m_replicator->inputSource())) {
 			return deviceSource->getLastFrame();
-		} else {
-			return "";
 		}
+		return "";
 	}
 
 	[[nodiscard]] std::string getFormat() const { return m_format; }

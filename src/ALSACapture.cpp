@@ -132,9 +132,9 @@ ALSACapture::ALSACapture(const ALSACaptureParameters &params)
 
 	if (!err) {
 		// get supported format
-		for (int i = 0; i < sizeof(formats) / sizeof(formats[0]); ++i) {
-			if (!snd_pcm_hw_params_test_format(m_pcm, hw_params, formats[i])) {
-				m_fmtList.push_back(formats[i]);
+		for (auto format : formats) {
+			if (!snd_pcm_hw_params_test_format(m_pcm, hw_params, format)) {
+				m_fmtList.push_back(format);
 			}
 		}
 	}
