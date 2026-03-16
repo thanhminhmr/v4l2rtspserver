@@ -104,7 +104,7 @@ public:
 	//    Add HLS & MPEG# Session
 	// -----------------------------------------
 	ServerMediaSession *AddHlsSession(
-			const std::string &url, const int hlsSegment, StreamReplicator *videoReplicator,
+			const std::string &url, const unsigned int hlsSegment, StreamReplicator *videoReplicator,
 			StreamReplicator *audioReplicator
 	) {
 		std::list<ServerMediaSubsession *> subSession;
@@ -140,22 +140,18 @@ public:
 		const unsigned char ttl = 5;
 		std::list<ServerMediaSubsession *> subSession;
 		if (videoReplicator) {
-			subSession.push_back(
-					MulticastServerMediaSubsession::createNew(
-							*this->env(), destinationAddress, Port(rtpPortNum), Port(rtcpPortNum), ttl, videoReplicator
-					)
-			);
+			subSession.push_back(MulticastServerMediaSubsession::createNew(
+					*this->env(), destinationAddress, Port(rtpPortNum), Port(rtcpPortNum), ttl, videoReplicator
+			));
 			// increment ports for next sessions
 			rtpPortNum += 2;
 			rtcpPortNum += 2;
 		}
 
 		if (audioReplicator) {
-			subSession.push_back(
-					MulticastServerMediaSubsession::createNew(
-							*this->env(), destinationAddress, Port(rtpPortNum), Port(rtcpPortNum), ttl, audioReplicator
-					)
-			);
+			subSession.push_back(MulticastServerMediaSubsession::createNew(
+					*this->env(), destinationAddress, Port(rtpPortNum), Port(rtcpPortNum), ttl, audioReplicator
+			));
 
 			// increment ports for next sessions
 			rtpPortNum += 2;

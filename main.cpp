@@ -12,12 +12,13 @@
 **
 ** -------------------------------------------------------------------------*/
 
-#include <dirent.h>
 #include <cerrno>
 #include <csignal>
+#include <cstdint>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <dirent.h>
 #include <sys/ioctl.h>
 
 #include <sstream>
@@ -103,7 +104,7 @@ int main(int argc, char **argv) {
 #endif
 	const char *defaultPort = getenv("PORT");
 	if (defaultPort != nullptr) {
-		rtspPort = atoi(defaultPort);
+		rtspPort = static_cast<unsigned short>(std::stoul(defaultPort));
 	}
 
 	// decode parameters
@@ -123,7 +124,7 @@ int main(int argc, char **argv) {
 				verbose++;
 			break;
 		case 'Q':
-			queueSize = atoi(optarg);
+			queueSize = std::stoi(optarg);
 			break;
 		case 'O':
 			outputFile = optarg;
@@ -137,10 +138,10 @@ int main(int argc, char **argv) {
 			ReceivingInterfaceAddr = inet_addr(optarg);
 			break;
 		case 'P':
-			rtspPort = atoi(optarg);
+			rtspPort = static_cast<unsigned short>(std::stoul(optarg));
 			break;
 		case 'p':
-			rtspOverHTTPPort = atoi(optarg);
+			rtspOverHTTPPort = static_cast<unsigned short>(std::stoul(optarg));
 			break;
 		case 'u':
 			url = optarg;
@@ -157,10 +158,10 @@ int main(int argc, char **argv) {
 			repeatConfig = false;
 			break;
 		case 't':
-			timeout = atoi(optarg);
+			timeout = std::stoi(optarg);
 			break;
 		case 'S':
-			hlsSegment = optarg ? atoi(optarg) : defaultHlsSegment;
+			hlsSegment = optarg ? std::stoul(optarg) : static_cast<unsigned int>(defaultHlsSegment);
 			break;
 #ifndef NO_OPENSSL
 		case 'x':
@@ -199,25 +200,36 @@ int main(int argc, char **argv) {
 			};
 			break;
 		case 'F':
-			fps = atoi(optarg);
+			fps = std::stoi(optarg);
 			break;
 		case 'W':
-			width = atoi(optarg);
+			width = std::stoi(optarg);
 			break;
 		case 'H':
-			height = atoi(optarg);
+			height = std::stoi(optarg);
 			break;
-		case 'G':
-			sscanf(optarg, "%dx%dx%d", &width, &height, &fps);
+		case 'G': {
+			std::istringstream iss(optarg);
+			std::string w, h, f;
+			std::getline(iss, w, 'x');
+			std::getline(iss, h, 'x');
+			std::getline(iss, f);
+			if (!w.empty())
+				width = std::stoi(w);
+			if (!h.empty())
+				height = std::stoi(h);
+			if (!f.empty())
+				fps = std::stoi(f);
 			break;
+		}
 
-			// ALSA
+		// ALSA
 #ifdef HAVE_ALSA
 		case 'A':
-			audioFreq = atoi(optarg);
+			audioFreq = std::stoi(optarg);
 			break;
 		case 'C':
-			audioNbChannels = atoi(optarg);
+			audioNbChannels = std::stoi(optarg);
 			break;
 		case 'a':
 			audioFmt = V4l2RTSPServer::decodeAudioFormat(optarg);
@@ -345,10 +357,10 @@ int main(int argc, char **argv) {
 		rtspServer.decodeMulticastUrl(maddr, destinationAddress, rtpPortNum, rtcpPortNum);
 
 		std::list<V4l2Output *> outList;
-		int nbSource = 0;
+		unsigned int nbSource = 0;
 		std::list<std::string>::iterator devIt;
 		for (devIt = devList.begin(); devIt != devList.end(); ++devIt) {
-			const std::string& deviceName(*devIt);
+			const std::string &deviceName(*devIt);
 
 			std::string videoDev;
 			std::string audioDev;

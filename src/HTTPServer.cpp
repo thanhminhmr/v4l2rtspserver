@@ -38,8 +38,7 @@ void HTTPServer::HTTPClientConnection::sendHeader(const char *contentType, unsig
 	);
 
 	// Send the response header
-	send(fClientOutputSocket, fResponseBuffer,
-		 std::strlen(reinterpret_cast<const char *>(fResponseBuffer)), 0);
+	send(fClientOutputSocket, fResponseBuffer, std::strlen(reinterpret_cast<const char *>(fResponseBuffer)), 0);
 	fResponseBuffer[0] = '\0'; // We've already sent the response.  This tells the calling code not to send it again.
 }
 
@@ -95,7 +94,7 @@ bool HTTPServer::HTTPClientConnection::sendM3u8PlayList(char const *urlSuffix) {
 		return false;
 	}
 
-	unsigned int startTime = subsession->getCurrentNPT(nullptr);
+	unsigned int startTime = static_cast<unsigned int>(subsession->getCurrentNPT(nullptr));
 	auto *httpServer = (HTTPServer *)(&fOurServer);
 	unsigned sliceDuration = httpServer->m_hlsSegment;
 	std::ostringstream os;
@@ -104,7 +103,7 @@ bool HTTPServer::HTTPClientConnection::sendM3u8PlayList(char const *urlSuffix) {
 	   << "#EXT-X-MEDIA-SEQUENCE:" << startTime << "\r\n"
 	   << "#EXT-X-TARGETDURATION:" << sliceDuration << "\r\n";
 
-	for (unsigned int slice = 0; slice * sliceDuration < duration; slice++) {
+	for (unsigned int slice = 0; slice * sliceDuration < static_cast<unsigned int>(duration); slice++) {
 		os << "#EXTINF:" << sliceDuration << ",\r\n";
 		os << urlSuffix << "?segment=" << (startTime + slice * sliceDuration) << "\r\n";
 	}
@@ -132,7 +131,7 @@ bool HTTPServer::HTTPClientConnection::sendMpdPlayList(char const *urlSuffix) {
 		return false;
 	}
 
-	unsigned int startTime = subsession->getCurrentNPT(nullptr);
+	unsigned int startTime = static_cast<unsigned int>(subsession->getCurrentNPT(nullptr));
 	auto *httpServer = (HTTPServer *)(&fOurServer);
 	unsigned sliceDuration = httpServer->m_hlsSegment;
 	std::ostringstream os;

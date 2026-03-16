@@ -74,5 +74,5 @@ char const *MulticastServerMediaSubsession::sdpLines(int addressFamily) {
 }
 
 char const *MulticastServerMediaSubsession::getAuxSDPLine(RTPSink *rtpSink, FramedSource *inputSource) {
-	return this->getAuxLine(dynamic_cast<V4L2DeviceSource *>(m_replicator->inputSource()), rtpSink);
+	return getAuxLine(dynamic_cast<V4L2DeviceSource *>(m_replicator->inputSource()), rtpSink);
 }

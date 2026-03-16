@@ -11,8 +11,8 @@
 
 #pragma once
 
-#include <StreamReplicator.hh>
 #include <MediaSink.hh>
+#include <StreamReplicator.hh>
 #include <linux/videodev2.h>
 
 #include "H264_V4l2DeviceSource.h"
@@ -22,7 +22,7 @@
 class DeviceSourceFactory {
 public:
 	static FramedSource *createFramedSource(
-			UsageEnvironment *env, const int format, DeviceInterface *devCapture, const int queueSize = 5,
+			UsageEnvironment *env, const unsigned int format, DeviceInterface *devCapture, const int queueSize = 5,
 			const V4L2DeviceSource::CaptureMode captureMode = V4L2DeviceSource::CAPTURE_INTERNAL_THREAD,
 			const int outFd = -1, const bool repeatConfig = true
 	) {
@@ -42,7 +42,7 @@ public:
 	}
 
 	static StreamReplicator *createStreamReplicator(
-			UsageEnvironment *env, const int format, DeviceInterface *devCapture, const int queueSize = 5,
+			UsageEnvironment *env, const unsigned int format, DeviceInterface *devCapture, const int queueSize = 5,
 			const V4L2DeviceSource::CaptureMode captureMode = V4L2DeviceSource::CAPTURE_INTERNAL_THREAD,
 			const int outFd = -1, const bool repeatConfig = true
 	) {

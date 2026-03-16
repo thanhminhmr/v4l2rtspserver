@@ -17,7 +17,7 @@
 void MJPEGVideoSource::afterGettingFrame(
 		unsigned frameSize, unsigned numTruncatedBytes, struct timeval presentationTime, unsigned durationInMicroseconds
 ) {
-	int headerSize = 0;
+	unsigned int headerSize = 0;
 
 	unsigned int i = 0;
 	while ((i < frameSize) && (headerSize == 0)) {
@@ -49,7 +49,7 @@ void MJPEGVideoSource::afterGettingFrame(
 			int length = (fTo[i + 2] << 8) | (fTo[i + 3]);
 			LOG(DEBUG) << "DQT length:" << length;
 
-			int qtable_length = length - 2;
+			unsigned int qtable_length = static_cast<unsigned int>(length) - 2;
 			unsigned int qtable_position = i + 4;
 			while (qtable_length > 0) {
 				LOG(DEBUG) << "DQT qtable_length:" << qtable_length;

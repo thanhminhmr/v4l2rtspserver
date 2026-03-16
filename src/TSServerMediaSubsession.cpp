@@ -48,14 +48,14 @@ TSServerMediaSubsession::TSServerMediaSubsession(
 
 TSServerMediaSubsession::~TSServerMediaSubsession() { Medium::close(m_hlsSink); }
 
-float TSServerMediaSubsession::getCurrentNPT(void *streamToken) { return (m_hlsSink->firstTime()); }
+float TSServerMediaSubsession::getCurrentNPT(void *streamToken) { return static_cast<float>(m_hlsSink->firstTime()); }
 
-float TSServerMediaSubsession::duration() const { return (m_hlsSink->duration()); }
+float TSServerMediaSubsession::duration() const { return static_cast<float>(m_hlsSink->duration()); }
 
 void TSServerMediaSubsession::seekStream(
 		unsigned clientSessionId, void *streamToken, double &seekNPT, double streamDuration, u_int64_t &numBytes
 ) {
-	m_slice = seekNPT / m_hlsSink->getSliceDuration();
+	m_slice = static_cast<unsigned int>(seekNPT / m_hlsSink->getSliceDuration());
 	seekNPT = m_slice * m_hlsSink->getSliceDuration();
 	numBytes = m_hlsSink->getBufferSize(m_slice);
 	std::cout << "seek seekNPT:" << seekNPT << " slice:" << m_slice << " numBytes:" << numBytes << std::endl;

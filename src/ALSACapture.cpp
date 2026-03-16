@@ -77,7 +77,7 @@ void ALSACapture::close() {
 }
 
 ALSACapture::ALSACapture(const ALSACaptureParameters &params)
-	: m_pcm(nullptr), m_bufferSize(0), m_periodSize(0), m_params(params) {
+	: m_pcm(nullptr), m_bufferSize(0), m_periodSize(0), m_fmt(SND_PCM_FORMAT_UNKNOWN), m_params(params) {
 	LOG(NOTICE) << "Open ALSA device: \"" << params.m_devName << "\"";
 
 	snd_pcm_hw_params_t *hw_params = nullptr;

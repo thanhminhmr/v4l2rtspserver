@@ -50,7 +50,7 @@ public:
 	// -----------------------------------------
 	//    convert V4L2 pix format to RTP mime
 	// -----------------------------------------
-	static std::string getVideoRtpFormat(const int format) {
+	static std::string getVideoRtpFormat(const unsigned int format) {
 		switch (format) {
 		case V4L2_PIX_FMT_HEVC:
 			return "video/H265";

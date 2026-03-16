@@ -97,9 +97,10 @@ protected:
 		static_cast<V4L2DeviceSource *>(clientData)->incomingPacketHandler();
 	};
 	void incomingPacketHandler();
-	int getNextFrame();
-	void processFrame(char *frame, int frameSize, const timeval &ref);
-	void queueFrame(char *frame, int frameSize, const timeval &tv, char *allocatedBuffer = nullptr);
+	ssize_t getNextFrame();
+	void processFrame(char *frame, size_t frameSize, const timeval &ref);
+	void postFrame(char *frame, ssize_t frameSize, const timeval &ref);
+	void queueFrame(char *frame, size_t frameSize, const timeval &tv, char *allocatedBuffer = nullptr);
 
 	// split packet in frames
 	virtual std::list<std::pair<std::uint8_t *, size_t>> splitFrames(std::uint8_t *frame, unsigned frameSize);
