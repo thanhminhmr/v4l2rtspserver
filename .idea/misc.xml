@@ -1,4 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="CMakeWorkspace" PROJECT_DIR="$PROJECT_DIR$" />
+  <component name="CidrRootsConfiguration">
+    <libraryRoots>
+      <file path="$PROJECT_DIR$/cmake-build-debug/libv4l2cpp" />
+      <file path="$PROJECT_DIR$/cmake-build-debug/live" />
+      <file path="$PROJECT_DIR$/libv4l2cpp" />
+    </libraryRoots>
+  </component>
 </project>

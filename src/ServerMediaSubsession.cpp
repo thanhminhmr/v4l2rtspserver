@@ -52,22 +52,19 @@ RTPSink *BaseServerMediaSubsession::createSink(
 		videoSink = H264VideoRTPSink::createNew(env, rtpGroupSock, rtpPayloadTypeIfDynamic);
 	} else if (format == "video/VP8") {
 		videoSink = VP8VideoRTPSink::createNew(env, rtpGroupSock, rtpPayloadTypeIfDynamic);
-	}
-#if LIVEMEDIA_LIBRARY_VERSION_INT > 1414454400
-	else if (format == "video/VP9") {
+	} else if (format == "video/VP9") {
 		videoSink = VP9VideoRTPSink::createNew(env, rtpGroupSock, rtpPayloadTypeIfDynamic);
 	} else if (format == "video/H265") {
 		videoSink = H265VideoRTPSink::createNew(env, rtpGroupSock, rtpPayloadTypeIfDynamic);
-	}
-#endif
-	else if (format == "video/JPEG") {
+	} else if (format == "video/JPEG") {
 		videoSink = JPEGVideoRTPSink::createNew(env, rtpGroupSock);
-	}
-#if LIVEMEDIA_LIBRARY_VERSION_INT >= 1596931200
-	else if (format == "video/RAW") {
-		std::string sampling;
+	} else if (format == "video/RAW") {
 		DeviceInterface *device = source->getDevice();
-		switch (device->getVideoFormat()) {
+		if (!device->isVideoDevice)
+			return nullptr;
+		auto *videoDevice = dynamic_cast<VideoCaptureAccess *>(device);
+		std::string sampling;
+		switch (videoDevice->getVideoFormat()) {
 		case V4L2_PIX_FMT_YUV444:
 			sampling = "YCbCr-4:4:4";
 			break;
@@ -92,14 +89,14 @@ RTPSink *BaseServerMediaSubsession::createSink(
 		case V4L2_PIX_FMT_BGR32:
 			sampling = "BGRA";
 			break;
+		default:
+			return nullptr;
 		}
 		videoSink = RawVideoRTPSink::createNew(
-				env, rtpGroupSock, rtpPayloadTypeIfDynamic, device->getWidth(), device->getHeight(), 8,
+				env, rtpGroupSock, rtpPayloadTypeIfDynamic, videoDevice->getWidth(), videoDevice->getHeight(), 8,
 				sampling.c_str(), "BT709-2"
 		);
-	}
-#endif
-	else if (format.find("audio/L16") == 0) {
+	} else if (format.find("audio/L16") == 0) {
 		std::istringstream is(format);
 		std::string dummy;
 		getline(is, dummy, '/');

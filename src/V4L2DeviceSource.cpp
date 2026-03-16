@@ -54,16 +54,14 @@ V4L2DeviceSource::V4L2DeviceSource(
 		UsageEnvironment &env, DeviceInterface *device, int outputFd, unsigned int queueSize, CaptureMode captureMode
 )
 	: FramedSource(env), m_in("in"), m_out("out"), m_outfd(outputFd), m_device(device), m_queueSize(queueSize) {
-	m_eventTriggerId = envir().taskScheduler().createEventTrigger(V4L2DeviceSource::deliverFrameStub);
+	m_eventTriggerId = envir().taskScheduler().createEventTrigger(deliverFrameStub);
 	if (m_device) {
 		switch (captureMode) {
 		case CAPTURE_INTERNAL_THREAD:
 			m_thread = std::thread(&V4L2DeviceSource::thread, this);
 			break;
 		case CAPTURE_LIVE555_THREAD:
-			envir().taskScheduler().turnOnBackgroundReadHandling(
-					m_device->getFd(), V4L2DeviceSource::incomingPacketHandlerStub, this
-			);
+			envir().taskScheduler().turnOnBackgroundReadHandling(m_device->getFd(), incomingPacketHandlerStub, this);
 			break;
 		case NO_CAPTURE:
 		default:
@@ -155,7 +153,7 @@ void V4L2DeviceSource::deliverFrame() {
 
 		if (fFrameSize > 0) {
 			// send Frame to the consumer
-			FramedSource::afterGetting(this);
+			afterGetting(this);
 		}
 	}
 }

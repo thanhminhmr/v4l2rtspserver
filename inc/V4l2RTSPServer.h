@@ -24,7 +24,7 @@
 
 class V4l2RTSPServer {
 public:
-	V4l2RTSPServer(
+	explicit V4l2RTSPServer(
 			const unsigned short rtspPort, const unsigned short rtspOverHTTPPort = 0, const int timeout = 10,
 			const unsigned int hlsSegment = 0,
 			const std::list<std::string> &userPasswordList = std::list<std::string>(), const char *realm = nullptr,
@@ -73,7 +73,7 @@ public:
 	) const;
 
 #ifdef HAVE_ALSA
-	StreamReplicator *CreateAudioReplicator(
+	[[nodiscard]] StreamReplicator *CreateAudioReplicator(
 			const std::string &audioDev, const std::list<snd_pcm_format_t> &audioFmtList, int audioFreq,
 			int audioNbChannels, int verbose, int queueSize, V4L2DeviceSource::CaptureMode captureMode
 	) const;
@@ -106,7 +106,7 @@ public:
 	ServerMediaSession *AddHlsSession(
 			const std::string &url, const int hlsSegment, StreamReplicator *videoReplicator,
 			StreamReplicator *audioReplicator
-	) {
+	) const {
 		std::list<ServerMediaSubsession *> subSession;
 		if (videoReplicator) {
 			subSession.push_back(
@@ -115,12 +115,7 @@ public:
 		}
 		ServerMediaSession *sms = this->addSession(url, subSession);
 
-		struct in_addr ip{};
-#if LIVEMEDIA_LIBRARY_VERSION_INT < 1611878400
-		ip.s_addr = ourIPAddress(*this->env());
-#else
-		ip.s_addr = ourIPv4Address(*this->env());
-#endif
+		const in_addr ip{.s_addr = ourIPv4Address(*this->env())};
 		LOG(NOTICE) << "HLS       http://" << inet_ntoa(ip) << ":" << m_rtspPort << "/" << url << ".m3u8";
 		LOG(NOTICE) << "MPEG-DASH http://" << inet_ntoa(ip) << ":" << m_rtspPort << "/" << url << ".mpd";
 
@@ -218,7 +213,7 @@ public:
 		return url;
 	}
 
-	[[nodiscard]] int numClientSessions() const { return m_rtspServer->numClientSessions(); }
+	[[nodiscard]] size_t numClientSessions() const { return m_rtspServer->numClientSessions(); }
 
 	void RemoveSession(ServerMediaSession *sms) const { m_rtspServer->deleteServerMediaSession(sms); }
 
@@ -253,15 +248,11 @@ protected:
 		if (subSession.empty() == false) {
 			sms = ServerMediaSession::createNew(*m_env, sessionName.c_str());
 			if (sms != nullptr) {
-				std::list<ServerMediaSubsession *>::const_iterator subIt;
-				for (subIt = subSession.begin(); subIt != subSession.end(); ++subIt) {
-					sms->addSubsession(*subIt);
+				for (const auto subIt : subSession) {
+					sms->addSubsession(subIt);
 				}
-
 				m_rtspServer->addServerMediaSession(sms);
-
-				const char *url = m_rtspServer->rtspURL(sms);
-				if (url != nullptr) {
+				if (const char *url = m_rtspServer->rtspURL(sms); url != nullptr) {
 					LOG(NOTICE) << "Play this stream using the URL \"" << url << "\"";
 					delete[] url;
 				}

@@ -25,6 +25,7 @@
 
 // v4l2rtspserver
 #include "V4L2DeviceSource.h"
+#include "VideoCaptureAccess.h"
 #include "logger.h"
 
 #ifdef HAVE_ALSA
@@ -36,12 +37,16 @@
 // ---------------------------------
 class BaseServerMediaSubsession {
 public:
-	BaseServerMediaSubsession(StreamReplicator *replicator) : m_replicator(replicator) {
+	explicit BaseServerMediaSubsession(StreamReplicator *replicator) : m_replicator(replicator) {
 		if (auto *deviceSource = dynamic_cast<V4L2DeviceSource *>(replicator->inputSource())) {
-			if (DeviceInterface *device = deviceSource->getDevice(); device->getVideoFormat() >= 0) {
-				m_format = getVideoRtpFormat(device->getVideoFormat());
+			if (DeviceInterface *device = deviceSource->getDevice(); device->isVideoDevice) {
+				auto *videoDevice = dynamic_cast<VideoCaptureAccess *>(device);
+				m_format = getVideoRtpFormat(videoDevice->getVideoFormat());
 			} else {
-				m_format = getAudioRtpFormat(device->getAudioFormat(), device->getSampleRate(), device->getChannels());
+				auto *audioDevice = dynamic_cast<ALSACapture *>(device);
+				m_format = getAudioRtpFormat(
+						audioDevice->getAudioFormat(), audioDevice->getSampleRate(), audioDevice->getChannels()
+				);
 			}
 			LOG(NOTICE) << "RTP format:" << m_format;
 		}
@@ -77,7 +82,7 @@ public:
 		}
 	}
 
-	static std::string getAudioRtpFormat(const int format, const int sampleRate, const int channels) {
+	static std::string getAudioRtpFormat(const int format, const unsigned int sampleRate, const unsigned int channels) {
 		std::ostringstream os;
 #ifdef HAVE_ALSA
 		os << "audio/";

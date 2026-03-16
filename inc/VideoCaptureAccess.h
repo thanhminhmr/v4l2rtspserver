@@ -19,15 +19,16 @@
 // -----------------------------------------
 class VideoCaptureAccess : public DeviceInterface {
 public:
-	VideoCaptureAccess(V4l2Capture *device) : m_device(device) {}
+	explicit VideoCaptureAccess(V4l2Capture *device) : DeviceInterface(true), m_device(device) {}
 	~VideoCaptureAccess() override { delete m_device; }
 
-	size_t read(char *buffer, size_t bufferSize) override { return m_device->read(buffer, bufferSize); }
+	size_t read(std::span<uint8_t> buffer) override { return m_device->read(reinterpret_cast<char *>(buffer.data()), buffer.size()); }
 	int getFd() override { return m_device->getFd(); }
 	unsigned long getBufferSize() override { return m_device->getBufferSize(); }
-	int getWidth() override { return m_device->getWidth(); }
-	int getHeight() override { return m_device->getHeight(); }
-	int getVideoFormat() override { return m_device->getFormat(); }
+
+	[[nodiscard]] unsigned int getWidth() const { return m_device->getWidth(); }
+	[[nodiscard]] unsigned int getHeight() const { return m_device->getHeight(); }
+	[[nodiscard]] unsigned int getVideoFormat() const { return m_device->getFormat(); }
 
 protected:
 	V4l2Capture *m_device;

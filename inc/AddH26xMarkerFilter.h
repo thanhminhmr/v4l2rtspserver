@@ -10,7 +10,6 @@
 #pragma once
 
 #include <algorithm>
-#include <cstdint>
 #include <memory>
 #include <vector>
 
@@ -28,14 +27,14 @@ public:
 
 private:
 	static void afterGettingFrame(
-			void *clientData, unsigned frameSize, unsigned numTruncatedBytes, struct timeval presentationTime,
-			unsigned durationInMicroseconds
+			void *clientData, const unsigned frameSize, const unsigned numTruncatedBytes,
+			const timeval presentationTime, [[maybe_unused]] unsigned durationInMicroseconds
 	) {
 		auto *sink = static_cast<AddH26xMarkerFilter *>(clientData);
 		sink->afterGettingFrame(frameSize, numTruncatedBytes, presentationTime);
 	}
 
-	void afterGettingFrame(unsigned frameSize, unsigned numTruncatedBytes, struct timeval presentationTime) {
+	void afterGettingFrame(const unsigned frameSize, const unsigned numTruncatedBytes, const timeval presentationTime) {
 		fPresentationTime = presentationTime;
 		fDurationInMicroseconds = 0;
 		if (numTruncatedBytes > 0) {

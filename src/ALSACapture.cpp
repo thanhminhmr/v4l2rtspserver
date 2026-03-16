@@ -58,11 +58,9 @@ static const snd_pcm_format_t formats[] = {
 
 ALSACapture *ALSACapture::createNew(const ALSACaptureParameters &params) {
 	auto *capture = new ALSACapture(params);
-	if (capture) {
-		if (capture->getFd() == -1) {
-			delete capture;
-			capture = nullptr;
-		}
+	if (capture->getFd() == -1) {
+		delete capture;
+		capture = nullptr;
 	}
 	return capture;
 }
@@ -77,7 +75,7 @@ void ALSACapture::close() {
 }
 
 ALSACapture::ALSACapture(const ALSACaptureParameters &params)
-	: m_pcm(nullptr), m_bufferSize(0), m_periodSize(0), m_params(params) {
+	: DeviceInterface(false), m_pcm(nullptr), m_bufferSize(0), m_periodSize(0), m_params(params) {
 	LOG(NOTICE) << "Open ALSA device: \"" << params.m_devName << "\"";
 
 	snd_pcm_hw_params_t *hw_params = nullptr;
@@ -147,7 +145,7 @@ int ALSACapture::configureFormat(snd_pcm_hw_params_t *hw_params) {
 
 	// try to set format, widht, height
 	std::list<snd_pcm_format_t>::iterator it;
-	for (it = m_params.m_formatList.begin(); it != m_params.m_formatList.end(); ++it) {
+	for (it = m_params.formatList.begin(); it != m_params.formatList.end(); ++it) {
 		snd_pcm_format_t format = *it;
 		int err = snd_pcm_hw_params_set_format(m_pcm, hw_params, format);
 		if (err < 0) {
@@ -162,13 +160,13 @@ int ALSACapture::configureFormat(snd_pcm_hw_params_t *hw_params) {
 	return -1;
 }
 
-size_t ALSACapture::read(char *buffer, size_t bufferSize) {
+size_t ALSACapture::read(std::span<uint8_t> buffer) {
 	size_t size = 0;
 	int fmt_phys_width_bytes = 0;
 	if (m_pcm != nullptr) {
 		fmt_phys_width_bytes = snd_pcm_format_physical_width(m_fmt) / 8;
 
-		snd_pcm_sframes_t ret = snd_pcm_readi(m_pcm, buffer, m_periodSize * fmt_phys_width_bytes);
+		const snd_pcm_sframes_t ret = snd_pcm_readi(m_pcm, buffer.data(), m_periodSize * fmt_phys_width_bytes);
 		LOG(DEBUG) << "ALSA buffer in_size:" << m_periodSize * fmt_phys_width_bytes << " read_size:" << ret;
 		if (ret > 0) {
 			size = ret;
@@ -176,12 +174,11 @@ size_t ALSACapture::read(char *buffer, size_t bufferSize) {
 			// swap if capture in not in network order
 			if (!snd_pcm_format_big_endian(m_fmt)) {
 				for (unsigned int i = 0; i < size; i++) {
-					char *ptr = &buffer[i * fmt_phys_width_bytes * m_params.m_channels];
-
+					uint8_t *ptr = &buffer[i * fmt_phys_width_bytes * m_params.m_channels];
 					for (unsigned int j = 0; j < m_params.m_channels; j++) {
 						ptr += j * fmt_phys_width_bytes;
 						for (int k = 0; k < fmt_phys_width_bytes / 2; k++) {
-							char byte = ptr[k];
+							const uint8_t byte = ptr[k];
 							ptr[k] = ptr[fmt_phys_width_bytes - 1 - k];
 							ptr[fmt_phys_width_bytes - 1 - k] = byte;
 						}

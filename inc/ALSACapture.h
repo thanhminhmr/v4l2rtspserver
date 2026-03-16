@@ -22,13 +22,13 @@
 
 struct ALSACaptureParameters {
 	ALSACaptureParameters(
-			const char *devname, const std::list<snd_pcm_format_t> &formatList, unsigned int sampleRate,
-			unsigned int channels
+			const char *devName, const std::list<snd_pcm_format_t> &formatList, const unsigned int sampleRate,
+			const unsigned int channels
 	)
-		: m_devName(devname), m_formatList(formatList), m_sampleRate(sampleRate), m_channels(channels) {}
+		: m_devName(devName), formatList(formatList), m_sampleRate(sampleRate), m_channels(channels) {}
 
 	std::string m_devName;
-	std::list<snd_pcm_format_t> m_formatList;
+	std::list<snd_pcm_format_t> formatList;
 	unsigned int m_sampleRate;
 	unsigned int m_channels;
 };
@@ -40,18 +40,18 @@ public:
 	void close();
 
 protected:
-	ALSACapture(const ALSACaptureParameters &params);
+	explicit ALSACapture(const ALSACaptureParameters &params);
 	int configureFormat(snd_pcm_hw_params_t *hw_params);
 
 public:
-	size_t read(char *buffer, size_t bufferSize) override;
+	size_t read(std::span<uint8_t> buffer) override;
 	int getFd() override;
 	unsigned long getBufferSize() override { return m_bufferSize; }
 
-	int getSampleRate() override { return m_params.m_sampleRate; }
-	int getChannels() override { return m_params.m_channels; }
-	int getAudioFormat() override { return m_fmt; }
-	std::list<int> getAudioFormatList() override { return m_fmtList; }
+	[[nodiscard]] unsigned int getSampleRate() const { return m_params.m_sampleRate; }
+	[[nodiscard]] unsigned int getChannels() const { return m_params.m_channels; }
+	[[nodiscard]] int getAudioFormat() const { return m_fmt; }
+	std::list<int> getAudioFormatList() { return m_fmtList; }
 
 private:
 	snd_pcm_t *m_pcm;
