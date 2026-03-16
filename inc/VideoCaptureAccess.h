@@ -22,9 +22,9 @@ public:
 	VideoCaptureAccess(V4l2Capture *device) : m_device(device) {}
 	~VideoCaptureAccess() override { delete m_device; }
 
-	size_t read(char *buffer, size_t bufferSize) override { return m_device->read(buffer, bufferSize); }
+	ssize_t read(char *buffer, size_t bufferSize) override { return m_device->read(buffer, bufferSize); }
 	int getFd() override { return m_device->getFd(); }
-	unsigned long getBufferSize() override { return m_device->getBufferSize(); }
+	size_t getBufferSize() override { return m_device->getBufferSize(); }
 	int getWidth() override { return m_device->getWidth(); }
 	int getHeight() override { return m_device->getHeight(); }
 	int getVideoFormat() override { return m_device->getFormat(); }

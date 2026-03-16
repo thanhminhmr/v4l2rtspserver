@@ -162,8 +162,8 @@ int ALSACapture::configureFormat(snd_pcm_hw_params_t *hw_params) {
 	return -1;
 }
 
-size_t ALSACapture::read(char *buffer, size_t bufferSize) {
-	size_t size = 0;
+ssize_t ALSACapture::read(char *buffer, size_t bufferSize) {
+	ssize_t size = 0;
 	int fmt_phys_width_bytes = 0;
 	if (m_pcm != nullptr) {
 		fmt_phys_width_bytes = snd_pcm_format_physical_width(m_fmt) / 8;

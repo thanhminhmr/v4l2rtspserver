@@ -24,7 +24,7 @@
 // ---------------------------------
 // V4L2 FramedSource Stats
 // ---------------------------------
-int V4L2DeviceSource::Stats::notify(int tv_sec, int framesize) {
+int V4L2DeviceSource::Stats::notify(long tv_sec, size_t framesize) {
 	m_fps++;
 	m_size += framesize;
 	if (tv_sec != m_fps_sec) {

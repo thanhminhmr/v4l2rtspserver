@@ -94,7 +94,7 @@ bool HTTPServer::HTTPClientConnection::sendM3u8PlayList(char const *urlSuffix) {
 		return false;
 	}
 
-	unsigned int startTime = static_cast<unsigned int>(subsession->getCurrentNPT(nullptr));
+	auto startTime = static_cast<unsigned int>(subsession->getCurrentNPT(nullptr));
 	auto *httpServer = (HTTPServer *)(&fOurServer);
 	unsigned sliceDuration = httpServer->m_hlsSegment;
 	std::ostringstream os;
@@ -131,7 +131,7 @@ bool HTTPServer::HTTPClientConnection::sendMpdPlayList(char const *urlSuffix) {
 		return false;
 	}
 
-	unsigned int startTime = static_cast<unsigned int>(subsession->getCurrentNPT(nullptr));
+	auto startTime = static_cast<unsigned int>(subsession->getCurrentNPT(nullptr));
 	auto *httpServer = (HTTPServer *)(&fOurServer);
 	unsigned sliceDuration = httpServer->m_hlsSegment;
 	std::ostringstream os;

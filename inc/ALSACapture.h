@@ -44,9 +44,9 @@ protected:
 	int configureFormat(snd_pcm_hw_params_t *hw_params);
 
 public:
-	size_t read(char *buffer, size_t bufferSize) override;
+	ssize_t read(char *buffer, size_t bufferSize) override;
 	int getFd() override;
-	unsigned long getBufferSize() override { return m_bufferSize; }
+	size_t getBufferSize() override { return m_bufferSize; }
 
 	int getSampleRate() override { return m_params.m_sampleRate; }
 	int getChannels() override { return m_params.m_channels; }
@@ -55,8 +55,8 @@ public:
 
 private:
 	snd_pcm_t *m_pcm;
-	unsigned long m_bufferSize;
-	unsigned long m_periodSize;
+	size_t m_bufferSize;
+	size_t m_periodSize;
 	ALSACaptureParameters m_params;
 	snd_pcm_format_t m_fmt;
 	std::list<int> m_fmtList;

@@ -8,17 +8,18 @@
 ** -------------------------------------------------------------------------*/
 
 #pragma once
+#include <cstddef>
 #include <list>
-#include <vector>
+#include <sys/types.h>
 
 // ---------------------------------
 // Device Interface
 // ---------------------------------
 class DeviceInterface {
 public:
-	virtual size_t read(char *buffer, size_t bufferSize) = 0;
+	virtual ssize_t read(char *buffer, size_t bufferSize) = 0;
 	virtual int getFd() = 0;
-	virtual unsigned long getBufferSize() = 0;
+	virtual size_t getBufferSize() = 0;
 	virtual int getWidth() { return -1; }
 	virtual int getHeight() { return -1; }
 	virtual int getVideoFormat() { return -1; }

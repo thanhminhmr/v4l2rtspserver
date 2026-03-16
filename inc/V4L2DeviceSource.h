@@ -32,14 +32,14 @@ public:
 	// Captured frame
 	// ---------------------------------
 	struct Frame {
-		Frame(char *buffer, const int size, const timeval timestamp, char *allocatedBuffer = nullptr)
+		Frame(char *buffer, const size_t size, const timeval timestamp, char *allocatedBuffer = nullptr)
 			: m_buffer(buffer), m_size(size), m_timestamp(timestamp), m_allocatedBuffer(allocatedBuffer) {};
 		Frame(const Frame &);
 		Frame &operator=(const Frame &);
 		~Frame() { delete[] m_allocatedBuffer; };
 
 		char *m_buffer;
-		unsigned int m_size;
+		size_t m_size;
 		timeval m_timestamp;
 		char *m_allocatedBuffer;
 	};
@@ -52,12 +52,12 @@ public:
 		Stats(std::string msg) : m_fps(0), m_fps_sec(0), m_size(0), m_msg(std::move(msg)) {};
 
 	public:
-		int notify(int tv_sec, int framesize);
+		int notify(long tv_sec, size_t framesize);
 
 	protected:
 		int m_fps;
-		int m_fps_sec;
-		int m_size;
+		long m_fps_sec;
+		size_t m_size;
 		const std::string m_msg;
 	};
 
